@@ -11,13 +11,13 @@ project("ViPER4Android")
 add_compile_definitions(VERSION_CODE=20231210)
 add_compile_definitions(VERSION_NAME="0.6.1")
 
-# FFTS
-#add_subdirectory(src/viper/ffts)
-
 # ViPERFX
 include_directories(src/include)
 
 set(FILES
+        # FFT
+        src/viper/utils/pffft.c
+
         # Main
         src/viper/ViPER.cpp
         src/ViPER4Android.cpp
