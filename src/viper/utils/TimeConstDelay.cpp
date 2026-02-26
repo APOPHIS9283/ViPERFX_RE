@@ -9,7 +9,10 @@ TimeConstDelay::TimeConstDelay() {
 float TimeConstDelay::ProcessSample(float sample) {
     float val = this->samples[this->offset];
     this->samples[this->offset] = sample;
-    this->offset = (uint32_t) modff((float) this->offset + 1, (float *) &this->sampleCount); // TODO: check if this is correct
+    this->offset++;
+    if (this->offset >= this->sampleCount) {
+        this->offset = 0;
+    }
     return val;
 }
 
