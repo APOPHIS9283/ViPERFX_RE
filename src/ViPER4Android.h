@@ -1,7 +1,8 @@
 #pragma once
 
 // Source: https://github.com/vipersaudio/viperfx_core_binary/blob/master/viperfx_intf.h
-// Updated parameters source: https://github.com/vipersaudio/viper4android_fx/blob/master/android_4.x/src/com/vipercn/viper4android_v2/service/ViPER4AndroidService.java
+// Updated parameters source:
+// https://github.com/vipersaudio/viper4android_fx/blob/master/android_4.x/src/com/vipercn/viper4android_v2/service/ViPER4AndroidService.java
 
 extern "C" {
 // Command code
@@ -26,6 +27,7 @@ extern "C" {
 #define PARAM_SET_RESET_STATUS 0x9003
 
 #define PARAM_CONVOLUTION_ENABLE 65538
+#define PARAM_CONVOLUTION_SET_KERNEL 65539
 #define PARAM_CONVOLUTION_PREPARE_BUFFER 65540
 #define PARAM_CONVOLUTION_SET_BUFFER 65541
 #define PARAM_CONVOLUTION_COMMIT_BUFFER 65542
@@ -110,5 +112,4 @@ extern "C" {
 #define PARAM_FET_COMPRESSOR_CREST 65624
 #define PARAM_FET_COMPRESSOR_ADAPT 65625
 #define PARAM_FET_COMPRESSOR_NO_CLIP 65626
-
 }

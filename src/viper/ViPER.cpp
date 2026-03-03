@@ -1,9 +1,9 @@
 #include "ViPER.h"
-#include <cstring>
-#include <chrono>
 #include "constants.h"
+#include <chrono>
+#include <cstring>
 
-ViPER::ViPER() : 
+ViPER::ViPER() :
     updateProcessTime(false),
     processTimeMs(0),
     samplingRate(VIPER_DEFAULT_SAMPLING_RATE),
@@ -80,7 +80,7 @@ ViPER::ViPER() :
     this->speakerCorrection.SetSamplingRate(this->samplingRate);
     this->speakerCorrection.Reset();
 
-    for (auto &softwareLimiter: this->softwareLimiters) {
+    for (auto &softwareLimiter : this->softwareLimiters) {
         softwareLimiter.Reset();
     }
 
@@ -91,7 +91,7 @@ ViPER::ViPER() :
     this->processTimeMs = 0;
 }
 
-void ViPER::process(std::vector<float>& buffer, uint32_t size) {
+void ViPER::process(std::vector<float> &buffer, uint32_t size) {
     if (this->updateProcessTime) {
         auto now = std::chrono::system_clock::now();
         auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
@@ -103,7 +103,7 @@ void ViPER::process(std::vector<float>& buffer, uint32_t size) {
     uint32_t tmpBufSize;
 
     if (this->convolver.GetEnabled() || this->vhe.GetEnabled()) {
-//        VIPER_LOGD("Convolver or VHE is enable, use wave buffer");
+        //        VIPER_LOGD("Convolver or VHE is enable, use wave buffer");
 
         if (!this->waveBuffer.PushSamples(buffer.data(), size)) {
             this->waveBuffer.Reset();
@@ -128,7 +128,7 @@ void ViPER::process(std::vector<float>& buffer, uint32_t size) {
         tmpBuf = ptr;
         tmpBufSize = ret;
     } else {
-//        VIPER_LOGD("Convolver and VHE are disabled, use adaptive buffer");
+        //        VIPER_LOGD("Convolver and VHE are disabled, use adaptive buffer");
 
         if (this->adaptiveBuffer.PushFrames(buffer.data(), size)) {
             this->adaptiveBuffer.SetBufferOffset(size);
@@ -141,7 +141,7 @@ void ViPER::process(std::vector<float>& buffer, uint32_t size) {
         }
     }
 
-//    VIPER_LOGD("Process buffer size: %d", tmpBufSize);
+    //    VIPER_LOGD("Process buffer size: %d", tmpBufSize);
     if (tmpBufSize != 0) {
         this->viperDdc.Process(tmpBuf, size);
         this->spectrumExtend.Process(tmpBuf, size);
@@ -186,8 +186,7 @@ void ViPER::process(std::vector<float>& buffer, uint32_t size) {
     memset(buffer.data(), 0, (size - tmpBufSize) * sizeof(float));
 }
 
-void ViPER::DispatchCommand(int param, int val1, int val2, int val3, int val4, uint32_t arrSize,
-                            signed char *arr) {
+void ViPER::DispatchCommand(int param, int val1, int val2, int val3, int val4, uint32_t arrSize, signed char *arr) {
     VIPER_LOGD("Dispatch command: %d, %d, %d, %d, %d, %d, %p", param, val1, val2, val3, val4, arrSize, arr);
     switch (param) {
         case PARAM_SET_UPDATE_STATUS: {
@@ -199,9 +198,18 @@ void ViPER::DispatchCommand(int param, int val1, int val2, int val3, int val4, u
             break;
         }
         case PARAM_CONVOLUTION_ENABLE: {
-//            this->convolver.SetEnabled(val1 != 0);
+            //            this->convolver.SetEnabled(val1 != 0);
             break;
         } // 0x10002
+        case PARAM_CONVOLUTION_SET_KERNEL: {
+            if (arrSize > 0 && arr != nullptr) {
+                char path[256];
+                memset(path, 0, sizeof(path));
+                memcpy(path, arr, arrSize < 255 ? arrSize : 255);
+                this->convolver.SetKernel(path);
+            }
+            break;
+        } // 0x10003
         case PARAM_CONVOLUTION_PREPARE_BUFFER: {
             break;
         } // 0x10004
@@ -372,8 +380,8 @@ void ViPER::DispatchCommand(int param, int val1, int val2, int val3, int val4, u
                 case 0: {
                     // Cure_R::SetPreset(pCVar17,0x5f028a);
                     struct Crossfeed::Preset preset = {
-                            .cutoff = 650,
-                            .feedback = 95,
+                        .cutoff = 650,
+                        .feedback = 95,
                     };
                     this->cure.SetPreset(preset);
                     break;
@@ -381,8 +389,8 @@ void ViPER::DispatchCommand(int param, int val1, int val2, int val3, int val4, u
                 case 1: {
                     // Cure_R::SetPreset(pCVar17,0x3c02bc);
                     struct Crossfeed::Preset preset = {
-                            .cutoff = 700,
-                            .feedback = 60,
+                        .cutoff = 700,
+                        .feedback = 60,
                     };
                     this->cure.SetPreset(preset);
                     break;
@@ -390,8 +398,8 @@ void ViPER::DispatchCommand(int param, int val1, int val2, int val3, int val4, u
                 case 2: {
                     // Cure_R::SetPreset(pCVar17,0x2d02bc);
                     struct Crossfeed::Preset preset = {
-                            .cutoff = 700,
-                            .feedback = 45,
+                        .cutoff = 700,
+                        .feedback = 45,
                     };
                     this->cure.SetPreset(preset);
                     break;
@@ -547,7 +555,7 @@ void ViPER::resetAllEffects() {
     this->speakerCorrection.SetSamplingRate(this->samplingRate);
     this->speakerCorrection.Reset();
 
-    for (auto &softwareLimiter: softwareLimiters) {
+    for (auto &softwareLimiter : softwareLimiters) {
         softwareLimiter.Reset();
     }
 }

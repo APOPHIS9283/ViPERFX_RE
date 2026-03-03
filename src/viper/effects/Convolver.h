@@ -1,8 +1,8 @@
 #pragma once
 
-#include <cstdint>
-#include "../utils/WaveBuffer.h"
 #include "../utils/PConvSingle.h"
+#include "../utils/WaveBuffer.h"
+#include <cstdint>
 
 class Convolver {
 public:
@@ -18,6 +18,7 @@ public:
     void SetCrossChannel(float param_1);
     void SetEnable(bool enabled);
     void SetKernel(float *buf, uint32_t len);
+    void SetKernel(const char *path);
     void SetKernelBuffer(uint32_t param_1, float *buf, uint32_t len);
     void SetKernelStereo(float *param_1, float *param_2, uint32_t param_3);
     void SetSamplingRate(uint32_t param_1);
@@ -42,5 +43,3 @@ private:
     uint32_t samplingRate;
     bool enable;
 };
-
-

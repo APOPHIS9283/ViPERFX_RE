@@ -1,10 +1,10 @@
 #include "Convolver.h"
 #include "../constants.h"
-#include <cstring>
+#include "../utils/WavReader.h"
 #include <cstddef>
+#include <cstring>
 
-Convolver::Convolver()
-{
+Convolver::Convolver() {
     this->enable = false;
     this->samplingRate = VIPER_DEFAULT_SAMPLING_RATE;
     this->waveBufferL = new WaveBuffer(2, 0x1000);
@@ -19,15 +19,13 @@ Convolver::Convolver()
     this->currentKernelBufferCrc = 0;
 }
 
-Convolver::~Convolver()
-{
+Convolver::~Convolver() {
     delete this->waveBufferL;
     delete this->waveBufferR;
     delete[] this->unknown1;
 }
 
-static uint32_t calculate_crc32(const uint8_t *data, uint32_t length)
-{
+static uint32_t calculate_crc32(const uint8_t *data, uint32_t length) {
     static const uint32_t crc_table[256] = {
         // Precomputed CRC32 table
         // This is used to speed up the CRC32 calculation
@@ -67,8 +65,7 @@ static uint32_t calculate_crc32(const uint8_t *data, uint32_t length)
     uint32_t crc = 0xffffffff; // Initialize CRC32 to all 1s
 
     // Loop through each byte in the input data
-    for (uint32_t i = 0; i < length; ++i)
-    {
+    for (uint32_t i = 0; i < length; ++i) {
         uint8_t byte = data[i];
         // Use the lookup table to update the CRC32 value
         crc = crc_table[(crc ^ byte) & 0xff] ^ (crc >> 8);
@@ -78,18 +75,15 @@ static uint32_t calculate_crc32(const uint8_t *data, uint32_t length)
     return ~crc;
 }
 
-void Convolver::CommitKernelBuffer(uint32_t param_1, uint32_t param_2, uint32_t kernelId)
-{
-    if (this->unknown1 == nullptr)
-    {
+void Convolver::CommitKernelBuffer(uint32_t param_1, uint32_t param_2, uint32_t kernelId) {
+    if (this->unknown1 == nullptr) {
         this->unknown2 = 0;
         this->unknown3 = 0;
         this->unknown4 = 0;
         return;
     }
 
-    if (this->unknown2 != param_1)
-    {
+    if (this->unknown2 != param_1) {
         delete[] this->unknown1;
         this->unknown1 = nullptr;
         this->unknown2 = 0;
@@ -98,8 +92,7 @@ void Convolver::CommitKernelBuffer(uint32_t param_1, uint32_t param_2, uint32_t 
         return;
     }
 
-    if (this->unknown3 == 0)
-    {
+    if (this->unknown3 == 0) {
         delete[] this->unknown1;
         this->unknown1 = nullptr;
         this->unknown2 = 0;
@@ -108,9 +101,8 @@ void Convolver::CommitKernelBuffer(uint32_t param_1, uint32_t param_2, uint32_t 
         return;
     }
 
-    uint32_t calculatedCrc = calculate_crc32((uint8_t *)this->unknown1, this->unknown3 * 4);
-    if (this->unknown4 - 1 > 1 || calculatedCrc != param_2 || calculatedCrc == this->currentKernelBufferCrc)
-    {
+    uint32_t calculatedCrc = calculate_crc32((uint8_t *) this->unknown1, this->unknown3 * 4);
+    if (this->unknown4 - 1 > 1 || calculatedCrc != param_2 || calculatedCrc == this->currentKernelBufferCrc) {
         delete[] this->unknown1;
         this->unknown1 = nullptr;
         this->unknown2 = 0;
@@ -121,12 +113,10 @@ void Convolver::CommitKernelBuffer(uint32_t param_1, uint32_t param_2, uint32_t 
 
     this->currentKernelBufferCrc = calculatedCrc;
 
-    if (this->unknown4 == 1)
-    {
+    if (this->unknown4 == 1) {
         int ret1 = this->kernelCh1.LoadKernel(this->unknown1, this->unknown3 / this->unknown4, 0x1000);
         int ret2 = this->kernelCh2.LoadKernel(this->unknown1, this->unknown3 / this->unknown4, 0x1000);
-        if (ret1 == 0 || ret2 == 0)
-        {
+        if (ret1 == 0 || ret2 == 0) {
             this->kernelCh1.UnloadKernel();
             this->kernelCh2.UnloadKernel();
             this->currentKernelBufferCrc = 0;
@@ -148,22 +138,18 @@ void Convolver::CommitKernelBuffer(uint32_t param_1, uint32_t param_2, uint32_t 
         this->unknown3 = 0;
         this->unknown4 = 0;
         Reset();
-    }
-    else
-    {
+    } else {
         float *newArray1 = new float[this->unknown3 / this->unknown4];
         float *newArray2 = new float[this->unknown3 / this->unknown4];
 
-        for (size_t i = 0; i < this->unknown3 / this->unknown4; i++)
-        {
+        for (size_t i = 0; i < this->unknown3 / this->unknown4; i++) {
             newArray1[i] = this->unknown1[i * 2];
             newArray2[i] = this->unknown1[i * 2 + 1];
         }
 
         int ret1 = this->kernelCh1.LoadKernel(newArray1, this->unknown3 / this->unknown4, 0x1000);
         int ret2 = this->kernelCh2.LoadKernel(newArray2, this->unknown3 / this->unknown4, 0x1000);
-        if (ret1 == 0 || ret2 == 0)
-        {
+        if (ret1 == 0 || ret2 == 0) {
             this->kernelCh1.UnloadKernel();
             this->kernelCh2.UnloadKernel();
             this->currentKernelBufferCrc = 0;
@@ -191,31 +177,24 @@ void Convolver::CommitKernelBuffer(uint32_t param_1, uint32_t param_2, uint32_t 
     }
 }
 
-bool Convolver::GetEnabled()
-{
+bool Convolver::GetEnabled() {
     return this->enable;
 }
 
-uint32_t Convolver::GetKernelID()
-{
+uint32_t Convolver::GetKernelID() {
     return this->kernelId;
 }
 
-void Convolver::PrepareKernelBuffer(uint32_t param_1, uint32_t param_2, int32_t param_3)
-{
-    if (param_3 == 0)
-    {
-        if (param_2 - 1 < 2)
-        {
+void Convolver::PrepareKernelBuffer(uint32_t param_1, uint32_t param_2, int32_t param_3) {
+    if (param_3 == 0) {
+        if (param_2 - 1 < 2) {
             delete[] this->unknown1;
             this->unknown1 = nullptr;
             this->unknown2 = param_1;
             this->unknown3 = 0;
             this->unknown4 = param_2;
         }
-    }
-    else
-    {
+    } else {
         delete[] this->unknown1;
         this->unknown1 = nullptr;
         this->unknown2 = 0;
@@ -231,24 +210,17 @@ void Convolver::PrepareKernelBuffer(uint32_t param_1, uint32_t param_2, int32_t 
     }
 }
 
-uint32_t Convolver::Process(float *source, float *dest, uint32_t frameSize)
-{
-    if (this->enable &&
-        this->kernelCh1.InstanceUsable() &&
-        this->kernelCh2.InstanceUsable() &&
-        this->waveBufferL->PushSamples(source, frameSize) != 0)
-    {
-        while (this->waveBufferL->GetBufferOffset() >= 0x1000)
-        {
+uint32_t Convolver::Process(float *source, float *dest, uint32_t frameSize) {
+    if (this->enable && this->kernelCh1.InstanceUsable() && this->kernelCh2.InstanceUsable() &&
+        this->waveBufferL->PushSamples(source, frameSize) != 0) {
+        while (this->waveBufferL->GetBufferOffset() >= 0x1000) {
             float *bufPtr = this->waveBufferL->GetBuffer();
             this->kernelCh1.ConvolveInterleaved(bufPtr, 0);
             this->kernelCh2.ConvolveInterleaved(bufPtr, 1);
 
-            if (isValidCrossChannel)
-            {
+            if (isValidCrossChannel) {
                 float cc = this->crossChannel;
-                for (size_t i = 0; i < 0x1000; i++)
-                {
+                for (size_t i = 0; i < 0x1000; i++) {
                     float L = bufPtr[i * 2];
                     float R = bufPtr[i * 2 + 1];
                     bufPtr[i * 2] = L + cc * (R - L);
@@ -267,24 +239,20 @@ uint32_t Convolver::Process(float *source, float *dest, uint32_t frameSize)
     return frameSize;
 }
 
-void Convolver::Reset()
-{
+void Convolver::Reset() {
     this->waveBufferL->Reset();
     this->waveBufferR->Reset();
     this->kernelCh1.Reset();
     this->kernelCh2.Reset();
 }
 
-void Convolver::SetCrossChannel(float crossChannel)
-{
-    if (crossChannel <= 0.0)
-    {
+void Convolver::SetCrossChannel(float crossChannel) {
+    if (crossChannel <= 0.0) {
         this->isValidCrossChannel = false;
         return;
     }
 
-    if (crossChannel > 1.0)
-    {
+    if (crossChannel > 1.0) {
         crossChannel = 1.0;
     }
 
@@ -292,20 +260,16 @@ void Convolver::SetCrossChannel(float crossChannel)
     this->isValidCrossChannel = true;
 }
 
-void Convolver::SetEnable(bool enabled)
-{
-    if (this->enable != enabled)
-    {
-        if (enabled)
-        {
+void Convolver::SetEnable(bool enabled) {
+    if (this->enable != enabled) {
+        if (enabled) {
             Reset();
         }
         this->enable = enabled;
     }
 }
 
-void Convolver::SetKernel(float *buf, uint32_t len)
-{
+void Convolver::SetKernel(float *buf, uint32_t len) {
     if (len < 16)
         return;
 
@@ -314,8 +278,7 @@ void Convolver::SetKernel(float *buf, uint32_t len)
 
     int ret1 = this->kernelCh1.LoadKernel(buf, len, 0x1000);
     int ret2 = this->kernelCh2.LoadKernel(buf, len, 0x1000);
-    if (ret1 == 0 || ret2 == 0)
-    {
+    if (ret1 == 0 || ret2 == 0) {
         this->kernelCh1.UnloadKernel();
         this->kernelCh2.UnloadKernel();
     }
@@ -325,16 +288,92 @@ void Convolver::SetKernel(float *buf, uint32_t len)
     Reset();
 }
 
-void Convolver::SetKernelBuffer(uint32_t param_1, float *buf, uint32_t len)
-{
+void Convolver::SetKernel(const char *path) {
+    if (path == nullptr)
+        return;
+    if (strlen(path) == 0)
+        return;
+
+    if (strcmp(path, this->kernelFilePath) == 0)
+        return;
+
+    this->kernelCh1.Reset();
+    this->kernelCh2.Reset();
+    this->kernelCh3.Reset();
+    this->kernelCh4.Reset();
+    this->kernelCh1.UnloadKernel();
+    this->kernelCh2.UnloadKernel();
+    this->kernelCh3.UnloadKernel();
+    this->kernelCh4.UnloadKernel();
+    this->isQuadChannel = 0;
+    this->currentKernelBufferCrc = 0;
+
+    WavData wav;
+    if (!ReadWavFile(path, &wav)) {
+        memset(this->kernelFilePath, 0, sizeof(this->kernelFilePath));
+        this->kernelId = 0;
+        Reset();
+        return;
+    }
+
+    if (wav.frameCount < 16 || wav.channels == 0 || wav.channels > 2) {
+        delete[] wav.samples;
+        memset(this->kernelFilePath, 0, sizeof(this->kernelFilePath));
+        this->kernelId = 0;
+        Reset();
+        return;
+    }
+
+    bool success;
+    if (wav.channels == 1) {
+        int ret1 = this->kernelCh1.LoadKernel(wav.samples, wav.frameCount, 0x1000);
+        int ret2 = this->kernelCh2.LoadKernel(wav.samples, wav.frameCount, 0x1000);
+        success = (ret1 != 0 && ret2 != 0);
+    } else {
+        float *ch1 = new float[wav.frameCount];
+        float *ch2 = new float[wav.frameCount];
+
+        for (uint32_t i = 0; i < wav.frameCount; i++) {
+            ch1[i] = wav.samples[i * 2];
+            ch2[i] = wav.samples[i * 2 + 1];
+        }
+
+        int ret1 = this->kernelCh1.LoadKernel(ch1, wav.frameCount, 0x1000);
+        int ret2 = this->kernelCh2.LoadKernel(ch2, wav.frameCount, 0x1000);
+        success = (ret1 != 0 && ret2 != 0);
+
+        delete[] ch1;
+        delete[] ch2;
+    }
+
+    delete[] wav.samples;
+
+    if (success) {
+        this->isQuadChannel = 1;
+        strncpy(this->kernelFilePath, path, sizeof(this->kernelFilePath) - 1);
+        this->kernelFilePath[sizeof(this->kernelFilePath) - 1] = '\0';
+        this->kernelId = 0;
+        this->currentKernelBufferCrc = 0;
+        Reset();
+    } else {
+        this->kernelCh1.UnloadKernel();
+        this->kernelCh2.UnloadKernel();
+        this->kernelCh3.UnloadKernel();
+        this->kernelCh4.UnloadKernel();
+        memset(this->kernelFilePath, 0, sizeof(this->kernelFilePath));
+        this->kernelId = 0;
+        Reset();
+    }
+}
+
+void Convolver::SetKernelBuffer(uint32_t param_1, float *buf, uint32_t len) {
     if (buf == nullptr || len == 0)
         return;
     if (this->unknown2 == 0)
         return;
 
     float *newArray = new float[this->unknown3 + len];
-    if (this->unknown1 != nullptr)
-    {
+    if (this->unknown1 != nullptr) {
         memcpy(newArray, this->unknown1, this->unknown3 * sizeof(float));
         delete[] this->unknown1;
     }
@@ -343,8 +382,7 @@ void Convolver::SetKernelBuffer(uint32_t param_1, float *buf, uint32_t len)
     this->unknown3 += len;
 }
 
-void Convolver::SetKernelStereo(float *param_1, float *param_2, uint32_t param_3)
-{
+void Convolver::SetKernelStereo(float *param_1, float *param_2, uint32_t param_3) {
     if (param_3 < 16)
         return;
 
@@ -353,8 +391,7 @@ void Convolver::SetKernelStereo(float *param_1, float *param_2, uint32_t param_3
 
     int ret1 = this->kernelCh1.LoadKernel(param_1, param_3, 0x1000);
     int ret2 = this->kernelCh2.LoadKernel(param_2, param_3, 0x1000);
-    if (ret1 == 0 || ret2 == 0)
-    {
+    if (ret1 == 0 || ret2 == 0) {
         this->kernelCh1.UnloadKernel();
         this->kernelCh2.UnloadKernel();
     }
@@ -364,10 +401,8 @@ void Convolver::SetKernelStereo(float *param_1, float *param_2, uint32_t param_3
     Reset();
 }
 
-void Convolver::SetSamplingRate(uint32_t samplingRate)
-{
-    if (this->samplingRate != samplingRate)
-    {
+void Convolver::SetSamplingRate(uint32_t samplingRate) {
+    if (this->samplingRate != samplingRate) {
         this->samplingRate = samplingRate;
     }
 }
