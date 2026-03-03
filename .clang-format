@@ -1,0 +1,43 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+IndentWidth: 4
+ColumnLimit: 120
+AccessModifierOffset: -4
+
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Empty
+
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignTrailingComments: true
+AlignOperands: Align
+
+SortIncludes: CaseSensitive
+IncludeBlocks: Preserve
+
+PointerAlignment: Right
+ReferenceAlignment: Right
+SpaceAfterCStyleCast: true
+
+BinPackArguments: true
+BinPackParameters: true
+
+BreakConstructorInitializers: AfterColon
+PackConstructorInitializers: Never
+ConstructorInitializerIndentWidth: 4
+
+IndentCaseLabels: true
+IndentCaseBlocks: false
+
+---
+Language: C
+BasedOnStyle: LLVM
+IndentWidth: 4
+ColumnLimit: 120
+PointerAlignment: Right
+SortIncludes: CaseSensitive
