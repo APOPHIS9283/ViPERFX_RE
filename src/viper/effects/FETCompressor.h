@@ -38,23 +38,23 @@ public:
 private:
     uint32_t samplingRate;
     float parameters[17];
-    float unk22;
+    float smoothingCoeff;
     bool enable;
     bool autoKnee;
     bool autoGain;
     bool autoAttack;
     bool autoRelease;
-    float unk27;
-    float unk28;
-    float unk29;
-    float unk23;
+    float releaseSmoothGR;
+    float attackSmoothGR;
+    float adaptiveGainState;
+    float smoothedThreshold;
     float threshold;
     float knee;
-    float unk24;
+    float smoothedGain;
     float gain;
     float ratio;
-    float unk25;
-    float unk26;
+    float runningPeak;
+    float runningRMS;
     float attack1;
     float attack2;
     float release1;
@@ -66,7 +66,5 @@ private:
     float crest2;
     float adapt1;
     float adapt2;
-    float noClip;
+    bool noClip;
 };
-
-

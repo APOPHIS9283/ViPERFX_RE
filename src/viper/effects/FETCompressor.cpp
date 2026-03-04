@@ -1,26 +1,10 @@
-#include <cmath>
 #include "FETCompressor.h"
 #include "../constants.h"
+#include <cmath>
 
-static const float DEFAULT_FETCOMP_PARAMETERS[] = {
-        1.000000,
-        0.000000,
-        0.000000,
-        0.000000,
-        1.000000,
-        0.000000,
-        1.000000,
-        0.514679,
-        1.000000,
-        0.384311,
-        1.000000,
-        0.500000,
-        0.879450,
-        0.884311,
-        0.615689,
-        0.660964,
-        1.000000
-};
+static const float DEFAULT_FETCOMP_PARAMETERS[] = {1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000,
+                                                   1.000000, 0.514679, 1.000000, 0.384311, 1.000000, 0.500000,
+                                                   0.879450, 0.884311, 0.615689, 0.660964, 1.000000};
 
 static double calculate_exp_something(double param_1, double param_2) {
     return 1.0 - exp(-1.0 / (param_2 * param_1));
@@ -42,7 +26,7 @@ float FETCompressor::GetMeter(int param_1) {
     }
 
     if (this->enable) {
-        float tmp = (6.907755 - this->unk28) / 6.907755;
+        float tmp = (6.907755 - this->attackSmoothGR) / 6.907755;
         if (tmp < 1.0) {
             if (tmp < 0.0) {
                 tmp = 0.0;
@@ -66,8 +50,8 @@ float FETCompressor::GetParameterDefault(FETCompressor::Parameter parameter) {
 }
 
 void FETCompressor::Process(float *samples, uint32_t size) {
-    return;
-    if (size == 0) return;
+    if (!this->enable || size == 0)
+        return;
 
     for (uint32_t i = 0; i < size * 2; i += 2) {
         double inL = abs(samples[i]);
@@ -86,8 +70,9 @@ void FETCompressor::Process(float *samples, uint32_t size) {
             samples[i + 1] *= (float) out;
         }
 
-        this->unk23 = this->unk23 + (this->threshold - this->unk23) * this->unk22;
-        this->unk24 = this->unk24 + this->unk22 * (this->gain - this->unk24);
+        this->smoothedThreshold =
+            this->smoothedThreshold + (this->threshold - this->smoothedThreshold) * this->smoothingCoeff;
+        this->smoothedGain = this->smoothedGain + this->smoothingCoeff * (this->gain - this->smoothedGain);
     }
 }
 
@@ -97,60 +82,126 @@ double FETCompressor::ProcessSidechain(double in) {
         in2 = 0.000001;
     }
 
-    float a = this->attack2;
-    float b = this->unk25 + this->crest2 * (in2 - this->unk25);
-    float c = this->unk26 + this->crest2 * (in2 - this->unk26);
-    float d = this->attack1;
+    float attackCoeff = this->attack2;
+    float releaseCoeff = this->release2;
+    float adaptiveAttackTime = this->attack1;
 
-    if (in2 < b) {
-        in2 = b;
+    float runningPeak = this->runningPeak + this->crest2 * ((float) in2 - this->runningPeak);
+    float runningRMS = this->runningRMS + this->crest2 * ((float) in2 - this->runningRMS);
+
+    if ((float) in2 < runningPeak) {
+        in2 = runningPeak;
     }
 
-    this->unk26 = c;
-    this->unk25 = in2;
+    this->runningRMS = runningRMS;
+    this->runningPeak = (float) in2;
 
-    in2 /= c;
+    float crestRatio = (float) in2 / runningRMS;
 
     if (this->autoAttack) {
-
+        adaptiveAttackTime = 2.0f * this->maxAttack / crestRatio;
+        if (adaptiveAttackTime <= 0.0f) {
+            attackCoeff = 1.0f;
+        } else {
+            attackCoeff = (float) calculate_exp_something(this->samplingRate, adaptiveAttackTime);
+        }
     }
 
     if (this->autoRelease) {
-
+        float adaptiveReleaseTime = 2.0f * this->maxRelease / crestRatio - adaptiveAttackTime;
+        if (adaptiveReleaseTime <= 0.0f) {
+            releaseCoeff = 1.0f;
+        } else {
+            releaseCoeff = (float) calculate_exp_something(this->samplingRate, adaptiveReleaseTime);
+        }
     }
 
-    if (in >= 0.000001) {
+    float logInput = logf(in >= 0.000001f ? (float) in : 0.000001f);
 
-    }
+    float diff = logInput - this->smoothedThreshold;
+    float ratioMul;
+    float halfThreshGR;
+    float halfKnee;
+    float kneeWidth;
 
     if (!this->autoKnee) {
-
+        float negRatio = -this->ratio;
+        kneeWidth = this->knee;
+        halfThreshGR = this->smoothedThreshold * negRatio * 0.5f;
+        halfKnee = kneeWidth * 0.5f;
+        ratioMul = negRatio;
     } else {
-
+        halfThreshGR = this->smoothedThreshold * 0.5f;
+        float kneeBase = this->adaptiveGainState + halfThreshGR;
+        kneeWidth = -(kneeBase * this->kneeMulti);
+        if (kneeWidth <= 0.0f) {
+            ratioMul = 1.0f;
+            halfKnee = 0.0f;
+            kneeWidth = 0.0f;
+        } else {
+            ratioMul = 1.0f;
+            halfKnee = kneeWidth * 0.5f;
+        }
     }
+
+    float gainReduction;
+    if (diff >= halfKnee) {
+        gainReduction = diff;
+    } else if (diff <= -(kneeWidth * 0.5f)) {
+        gainReduction = 0.0f;
+    } else {
+        float doubled = kneeWidth * 2.0f;
+        float shifted = diff + halfKnee;
+        gainReduction = (shifted * shifted) / doubled;
+    }
+
+    gainReduction *= ratioMul;
+
+    float relSmoothed = this->releaseSmoothGR + (gainReduction - this->releaseSmoothGR) * releaseCoeff;
+    if (gainReduction <= relSmoothed) {
+        gainReduction = relSmoothed;
+    }
+
+    float atkDiff = gainReduction - this->attackSmoothGR;
+    this->releaseSmoothGR = gainReduction;
+    float smoothedGR = this->attackSmoothGR + atkDiff * attackCoeff;
+
+    float negSmoothedGR = -smoothedGR;
+    float adaptTarget = negSmoothedGR - halfThreshGR - this->adaptiveGainState;
+    this->attackSmoothGR = smoothedGR;
+
+    this->adaptiveGainState = this->adaptiveGainState + adaptTarget * this->adapt2;
 
     if (this->autoGain) {
         if (!this->noClip) {
-
+            float makeupGain = this->adaptiveGainState + halfThreshGR;
+            return exp(negSmoothedGR - makeupGain);
         } else {
-
+            float outputLevel = logInput - smoothedGR;
+            float makeupGain = halfThreshGR + this->adaptiveGainState;
+            float check = outputLevel - makeupGain;
+            if (check > 0.0011512704f) {
+                outputLevel = outputLevel - halfThreshGR;
+                outputLevel = outputLevel + 0.0011512704f;
+                makeupGain = outputLevel + halfThreshGR;
+                this->adaptiveGainState = outputLevel;
+            }
+            return exp(negSmoothedGR - makeupGain);
         }
-
-//        return exp(-a - fVar6); // FIXME: Change "a" and "fVar6" variable
     }
 
-    return exp(this->unk24 - a); // FIXME: Change "a" variable
+    return exp(this->smoothedGain - smoothedGR);
 }
 
 void FETCompressor::Reset() {
-    this->unk22 = calculate_exp_something(this->samplingRate, 0.05);
-    this->unk23 = this->threshold;
-    this->unk24 = this->gain;
-    this->unk25 = 0.000001;
-    this->unk26 = 0.000001;
-    this->unk27 = 0.0;
-    this->unk28 = 0.0;
-    this->unk29 = 0.0;
+    this->smoothingCoeff = calculate_exp_something(this->samplingRate, 0.05);
+    this->smoothedThreshold = this->threshold;
+    this->smoothedGain = this->gain;
+    this->runningPeak = 0.000001;
+    this->runningRMS = 0.000001;
+    this->releaseSmoothGR = 0.0;
+    this->attackSmoothGR = 0.0;
+    this->adaptiveGainState = 0.0;
 }
 
 void FETCompressor::SetParameter(FETCompressor::Parameter parameter, float value) {
