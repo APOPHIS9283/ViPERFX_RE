@@ -19,13 +19,13 @@ float Cure::GetLevelDelay() {
     return this->crossfeed.GetLevelDelay();
 }
 
-// TODO: Fix with crossfeed
 struct Crossfeed::Preset Cure::GetPreset() {
     return this->crossfeed.GetPreset();
 }
 
 void Cure::Process(float *buffer, uint32_t size) {
-    if (!this->enabled) return;
+    if (!this->enabled)
+        return;
 
     this->crossfeed.ProcessFrames(buffer, size);
     this->passFilter.ProcessFrames(buffer, size);

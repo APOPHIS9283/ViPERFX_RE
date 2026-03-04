@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CCombFilter.h"
 #include "CAllpassFilter.h"
+#include "CCombFilter.h"
 
 class CRevModel {
 public:
@@ -32,8 +32,8 @@ private:
     float damp;
     float internalDamp;
     float wet;
-    float unknown1;
-    float unknown2;
+    float wet1;
+    float wet2;
     float dry;
     float width;
     float mode;
@@ -46,6 +46,3 @@ private:
 
     float *buffers[24];
 };
-
-
-

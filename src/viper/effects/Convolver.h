@@ -17,8 +17,8 @@ public:
     void Reset();
     void SetCrossChannel(float param_1);
     void SetEnable(bool enabled);
-    void SetKernel(float *buf, uint32_t len);
     void SetKernel(const char *path);
+    void SetKernel(float *buf, uint32_t len);
     void SetKernelBuffer(uint32_t param_1, float *buf, uint32_t len);
     void SetKernelStereo(float *param_1, float *param_2, uint32_t param_3);
     void SetSamplingRate(uint32_t param_1);
@@ -32,10 +32,10 @@ private:
     PConvSingle kernelCh4;
     char kernelFilePath[256];
     uint32_t kernelId;
-    float *unknown1;
-    uint32_t unknown2;
-    uint32_t unknown3;
-    uint32_t unknown4;
+    float *kernelBuffer;
+    uint32_t expectedSize;
+    uint32_t currentSize;
+    uint32_t channelCount;
     uint32_t currentKernelBufferCrc;
     int isQuadChannel;
     float crossChannel;

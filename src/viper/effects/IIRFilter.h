@@ -1,8 +1,8 @@
 #pragma once
 
-#include <cstdint>
 #include "../utils/MinPhaseIIRCoeffs.h"
 #include <array>
+#include <cstdint>
 
 // Iscle: Verified with the latest version at 13/12/2022
 
@@ -22,10 +22,8 @@ private:
     bool enable;
     MinPhaseIIRCoeffs minPhaseIirCoeffs;
     double buf[496];
-    uint32_t unknown2;
-    uint32_t unknown3;
-    uint32_t unknown4;
+    uint32_t bufIndex0;
+    uint32_t bufIndex1;
+    uint32_t bufIndex2;
     std::array<float, 31> bandLevelsWithQ;
 };
-
-

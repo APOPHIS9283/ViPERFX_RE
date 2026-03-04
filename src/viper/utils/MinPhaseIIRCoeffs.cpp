@@ -5,96 +5,38 @@
 // Iscle: Verified with the latest version at 13/12/2022
 
 static const float MIN_PHASE_IIR_COEFFS_FREQ_10BANDS[] = {
-        31.0,
-        62.0,
-        125.0,
-        250.0,
-        500.0,
-        1000.0,
-        2000.0,
-        4000.0,
-        8000.0,
-        16000.0
+    31.0, 62.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0
 };
 
 static const float MIN_PHASE_IIR_COEFFS_FREQ_15BANDS[] = {
-        25.0,
-        40.0,
-        63.0,
-        100.0,
-        160.0,
-        250.0,
-        400.0,
-        630.0,
-        1000.0,
-        1600.0,
-        2500.0,
-        4000.0,
-        6300.0,
-        10000.0,
-        16000.0
+    25.0,
+    40.0,
+    63.0,
+    100.0,
+    160.0,
+    250.0,
+    400.0,
+    630.0,
+    1000.0,
+    1600.0,
+    2500.0,
+    4000.0,
+    6300.0,
+    10000.0,
+    16000.0
 };
 
 static const float MIN_PHASE_IIR_COEFFS_FREQ_25BANDS[] = {
-        20.0,
-        31.5,
-        40.0,
-        50.0,
-        80.0,
-        100.0,
-        125.0,
-        160.0,
-        250.0,
-        315.0,
-        400.0,
-        500.0,
-        800.0,
-        1000.0,
-        1250.0,
-        1600.0,
-        2500.0,
-        3150.0,
-        4000.0,
-        5000.0,
-        8000.0,
-        10000.0,
-        12500.0,
-        16000.0,
-        20000.0
+    20.0,   31.5,   40.0,   50.0,    80.0,    100.0,   125.0,  160.0,  250.0,
+    315.0,  400.0,  500.0,  800.0,   1000.0,  1250.0,  1600.0, 2500.0, 3150.0,
+    4000.0, 5000.0, 8000.0, 10000.0, 12500.0, 16000.0, 20000.0
 };
 
 static const float MIN_PHASE_IIR_COEFFS_FREQ_31BANDS[] = {
-        20.0,
-        25.0,
-        31.5,
-        40.0,
-        50.0,
-        63.0,
-        80.0,
-        100.0,
-        125.0,
-        160.0,
-        200.0,
-        250.0,
-        315.0,
-        400.0,
-        500.0,
-        630.0,
-        800.0,
-        1000.0,
-        1250.0,
-        1600.0,
-        2000.0,
-        2500.0,
-        3150.0,
-        4000.0,
-        5000.0,
-        6300.0,
-        8000.0,
-        10000.0,
-        12500.0,
-        16000.0,
-        20000.0
+    20.0,   25.0,   31.5,   40.0,    50.0,    63.0,    80.0,   100.0,
+    125.0,  160.0,  200.0,  250.0,   315.0,   400.0,   500.0,  630.0,
+    800.0,  1000.0, 1250.0, 1600.0,  2000.0,  2500.0,  3150.0, 4000.0,
+    5000.0, 6300.0, 8000.0, 10000.0, 12500.0, 16000.0, 20000.0
 };
 
 MinPhaseIIRCoeffs::MinPhaseIIRCoeffs() {
@@ -106,7 +48,9 @@ MinPhaseIIRCoeffs::~MinPhaseIIRCoeffs() {
     delete[] this->coeffs;
 }
 
-void MinPhaseIIRCoeffs::Find_F1_F2(double param_2, double param_3, double *param_4, double *param_5) {
+void MinPhaseIIRCoeffs::Find_F1_F2(
+    double param_2, double param_3, double *param_4, double *param_5
+) {
     double x = pow(2.0, param_3 / 2.0);
     *param_4 = param_2 / x;
     *param_5 = param_2 * x;
@@ -131,7 +75,9 @@ float MinPhaseIIRCoeffs::GetIndexFrequency(uint32_t index) {
     }
 }
 
-int MinPhaseIIRCoeffs::SolveRoot(double param_2, double param_3, double param_4, double *param_5) {
+int MinPhaseIIRCoeffs::SolveRoot(
+    double param_2, double param_3, double param_4, double *param_5
+) {
     double x = (param_4 - (param_3 * param_3) / (param_2 * 4.0)) / param_2;
     double y = param_3 / (param_2 + param_2);
 
@@ -159,7 +105,7 @@ int MinPhaseIIRCoeffs::UpdateCoeffs(uint32_t bands, uint32_t samplingRate) {
     this->bands = bands;
 
     delete[] this->coeffs;
-    this->coeffs = new double[bands * 4](); // TODO: Check this array size, original type: float
+    this->coeffs = new double[bands * 4]();
 
     const float *bandFreqs;
     double tmp;

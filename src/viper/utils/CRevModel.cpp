@@ -106,7 +106,8 @@ float CRevModel::GetWidth() {
 }
 
 void CRevModel::Mute() {
-    if (GetMode() >= 0.5) return;
+    if (GetMode() >= 0.5)
+        return;
 
     for (int i = 0; i < 8; i++) {
         combL[i].Mute();
@@ -135,13 +136,14 @@ void CRevModel::ProcessReplace(float *bufL, float *bufR, uint32_t size) {
             outR = this->allpassR[i].Process(outR);
         }
 
-        bufL[idx] = outL * this->unknown1 + outR * this->unknown2 + bufL[idx] * this->dry;
-        bufR[idx] = outR * this->unknown1 + outL * this->unknown2 + bufR[idx] * this->dry;
+        bufL[idx] = outL * this->wet1 + outR * this->wet2 + bufL[idx] * this->dry;
+        bufR[idx] = outR * this->wet1 + outL * this->wet2 + bufR[idx] * this->dry;
     }
 }
 
 void CRevModel::Reset() {
-    if (GetMode() >= 0.5) return;
+    if (GetMode() >= 0.5)
+        return;
 
     for (int i = 0; i < 8; i++) {
         combL[i].Mute();
@@ -184,8 +186,8 @@ void CRevModel::SetWidth(float width) {
 }
 
 void CRevModel::UpdateCoeffs() {
-    this->unknown1 = this->wet * (this->width / 2.0f + 0.5f);
-    this->unknown2 = this->wet * (1.0f - this->width) / 2.0f;
+    this->wet1 = this->wet * (this->width / 2.0f + 0.5f);
+    this->wet2 = this->wet * (1.0f - this->width) / 2.0f;
 
     if (this->mode >= 0.5) {
         this->internalRoomSize = 1.0;

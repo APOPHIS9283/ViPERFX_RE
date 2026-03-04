@@ -12,13 +12,11 @@ public:
 
 private:
     float gate;
-    float unknown1;
-    float unknown2;
-    float unknown3;
+    float targetGain;
+    float gainEnvelope;
+    float smoothedGain;
     float arr256[256];
     float arr512[512];
-    uint32_t unknown4;
+    uint32_t writeIndex;
     bool ready;
 };
-
-
