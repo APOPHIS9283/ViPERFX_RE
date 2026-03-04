@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cstdint>
 #include "../utils/Biquad.h"
+#include <cstdint>
 
 class PlaybackGain {
 public:
@@ -18,17 +18,15 @@ public:
 
 private:
     float ratio2;
-    float unknown1;
+    float logCoeff;
     uint32_t counterTo100;
     float ratio1;
     float volume;
     float maxGainFactor;
-    float unknown2;
-    float unknown3;
+    float currentGainL;
+    float currentGainR;
     Biquad biquad1;
     Biquad biquad2;
     uint32_t samplingRate;
     bool enable;
 };
-
-

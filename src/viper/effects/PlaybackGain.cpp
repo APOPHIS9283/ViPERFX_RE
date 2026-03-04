@@ -1,20 +1,20 @@
-#include <cmath>
 #include "PlaybackGain.h"
 #include "../constants.h"
+#include <cmath>
 
 PlaybackGain::PlaybackGain() {
     this->enable = false;
     this->samplingRate = VIPER_DEFAULT_SAMPLING_RATE;
-    this->unknown1 = 0.4342945;
+    this->logCoeff = 0.4342945;
     this->counterTo100 = 0;
     this->ratio1 = 2.0;
     this->ratio2 = 0.5;
     this->volume = 1.0;
     this->maxGainFactor = 1.0;
-    this->unknown2 = 1.0;
-    this->unknown3 = 1.0;
-    this->biquad1.SetBandPassParameter(2200.0,this->samplingRate,0.33);
-    this->biquad2.SetBandPassParameter(2200.0,this->samplingRate,0.33);
+    this->currentGainL = 1.0;
+    this->currentGainR = 1.0;
+    this->biquad1.SetBandPassParameter(2200.0, this->samplingRate, 0.33);
+    this->biquad2.SetBandPassParameter(2200.0, this->samplingRate, 0.33);
 }
 
 double PlaybackGain::AnalyseWave(float *samples, uint32_t size) {
@@ -39,13 +39,11 @@ double PlaybackGain::AnalyseWave(float *samples, uint32_t size) {
     return tmp / (double) size;
 }
 
-//static float PlaybackGain::ProcessSingle(float sample) {
-//
-//}
-
 void PlaybackGain::Process(float *samples, uint32_t size) {
-    if (!this->enable) return;
-    if (size == 0) return;
+    if (!this->enable)
+        return;
+    if (size == 0)
+        return;
 
     double analyzed = AnalyseWave(samples, size);
     double a = log(analyzed);
@@ -54,7 +52,7 @@ void PlaybackGain::Process(float *samples, uint32_t size) {
         this->counterTo100++;
     }
 
-    double b = a * this->unknown1 * 10.0 + 23.0;
+    double b = a * this->logCoeff * 10.0 + 23.0;
     double c = ((double) this->counterTo100 / 100.0) * (b * this->ratio2 - b);
     double d = c / 100.0;
     double e = pow(10.0, (c - d * d * 50.0) / 20.0);
@@ -65,23 +63,32 @@ void PlaybackGain::Process(float *samples, uint32_t size) {
         f = size;
     }
 
-    double unk2 = this->unknown2;
-    double g = (e * this->volume - this->unknown2) / f;
-    if (g >= 0.0) {
-        g *= 0.0625;
-    }
+    double target = e * this->volume;
 
-    for (uint32_t i = 0; i < size; i++) {
-        
+    for (int ch = 0; ch < 2; ch++) {
+        float &gain = (ch == 0) ? this->currentGainL : this->currentGainR;
+        double g = (target - gain) / f;
+        if (g >= 0.0) {
+            g *= 0.0625;
+        }
+        for (uint32_t i = 0; i < size; i++) {
+            samples[i * 2 + ch] *= gain;
+            gain += (float) g;
+            if (gain > this->maxGainFactor) {
+                gain = this->maxGainFactor;
+            } else if (gain < -this->maxGainFactor) {
+                gain = -this->maxGainFactor;
+            }
+        }
     }
 }
 
 void PlaybackGain::Reset() {
-    this->biquad1.SetBandPassParameter(2200.0,this->samplingRate,0.33);
-    this->biquad2.SetBandPassParameter(2200.0,this->samplingRate,0.33);
-    this->unknown2 = 1.0;
+    this->biquad1.SetBandPassParameter(2200.0, this->samplingRate, 0.33);
+    this->biquad2.SetBandPassParameter(2200.0, this->samplingRate, 0.33);
+    this->currentGainL = 1.0;
     this->counterTo100 = 0;
-    this->unknown3 = 1.0;
+    this->currentGainR = 1.0;
 }
 
 void PlaybackGain::SetEnable(bool enable) {
