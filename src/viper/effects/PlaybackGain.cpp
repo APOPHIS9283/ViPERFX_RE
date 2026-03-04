@@ -46,6 +46,11 @@ void PlaybackGain::Process(float *samples, uint32_t size) {
         return;
 
     double analyzed = AnalyseWave(samples, size);
+
+    // Avoid log(0) or small values.
+    if (analyzed < 1e-10) {
+        analyzed = 1e-10;
+    }
     double a = log(analyzed);
 
     if (this->counterTo100 < 100) {
