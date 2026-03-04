@@ -182,12 +182,25 @@ void ViPER::process(std::vector<float> &buffer, uint32_t size) {
         }
     }
 
-    memmove(buffer.data() + (size - tmpBufSize) * 2, buffer.data(), tmpBufSize * sizeof(float));
+    memmove(
+        buffer.data() + (size - tmpBufSize) * 2, buffer.data(), tmpBufSize * sizeof(float)
+    );
     memset(buffer.data(), 0, (size - tmpBufSize) * sizeof(float));
 }
 
-void ViPER::DispatchCommand(int param, int val1, int val2, int val3, int val4, uint32_t arrSize, signed char *arr) {
-    VIPER_LOGD("Dispatch command: %d, %d, %d, %d, %d, %d, %p", param, val1, val2, val3, val4, arrSize, arr);
+void ViPER::DispatchCommand(
+    int param, int val1, int val2, int val3, int val4, uint32_t arrSize, signed char *arr
+) {
+    VIPER_LOGD(
+        "Dispatch command: %d, %d, %d, %d, %d, %d, %p",
+        param,
+        val1,
+        val2,
+        val3,
+        val4,
+        arrSize,
+        arr
+    );
     switch (param) {
         case PARAM_SET_UPDATE_STATUS: {
             this->updateProcessTime = val1 != 0;
@@ -236,7 +249,9 @@ void ViPER::DispatchCommand(int param, int val1, int val2, int val3, int val4, u
             break;
         } // 0x1000A
         case PARAM_DDC_COEFFICIENTS: {
-            this->viperDdc.SetCoeffs(arrSize, (float *) arr, (float *) (arr + arrSize * sizeof(float)));
+            this->viperDdc.SetCoeffs(
+                arrSize, (float *) arr, (float *) (arr + arrSize * sizeof(float))
+            );
             break;
         } // 0x1000B
         case PARAM_SPECTRUM_EXTENSION_ENABLE: {
@@ -450,7 +465,9 @@ void ViPER::DispatchCommand(int param, int val1, int val2, int val3, int val4, u
             break;
         } // 0x1004A
         case PARAM_FET_COMPRESSOR_RATIO: {
-            this->fetCompressor.SetParameter(FETCompressor::THRESHOLD, (float) val1 / 100.0f);
+            this->fetCompressor.SetParameter(
+                FETCompressor::THRESHOLD, (float) val1 / 100.0f
+            );
             break;
         } // 0x1004B
         case PARAM_FET_COMPRESSOR_KNEE: {
@@ -485,7 +502,9 @@ void ViPER::DispatchCommand(int param, int val1, int val2, int val3, int val4, u
             break;
         } // 0x10055
         case PARAM_FET_COMPRESSOR_MAX_RELEASE: {
-            this->fetCompressor.SetParameter(FETCompressor::MAX_ATTACK, (float) val1 / 100.0f);
+            this->fetCompressor.SetParameter(
+                FETCompressor::MAX_ATTACK, (float) val1 / 100.0f
+            );
             break;
         } // 0x10056
         case PARAM_FET_COMPRESSOR_CREST: {

@@ -14,12 +14,8 @@ MultiBiquad::MultiBiquad() {
 }
 
 double MultiBiquad::ProcessSample(double sample) {
-    double out =
-            sample * this->b0 +
-            this->x1 * this->b1 +
-            this->x2 * this->b2 +
-            this->y1 * this->a1 +
-            this->y2 * this->a2;
+    double out = sample * this->b0 + this->x1 * this->b1 + this->x2 * this->b2
+                 + this->y1 * this->a1 + this->y2 * this->a2;
 
     this->x2 = this->x1;
     this->x1 = sample;
@@ -29,8 +25,14 @@ double MultiBiquad::ProcessSample(double sample) {
     return out;
 }
 
-void
-MultiBiquad::RefreshFilter(FilterType type, float gainAmp, float frequency, uint32_t samplingRate, float qFactor, bool param_7) {
+void MultiBiquad::RefreshFilter(
+    FilterType type,
+    float gainAmp,
+    float frequency,
+    uint32_t samplingRate,
+    float qFactor,
+    bool param_7
+) {
     double gain;
 
     if (type == FilterType::PEAK || type == FilterType::LOW_SHELF || type == HIGH_SHELF) {
@@ -47,7 +49,8 @@ MultiBiquad::RefreshFilter(FilterType type, float gainAmp, float frequency, uint
     double z;
 
     if (type == FilterType::LOW_SHELF || type == FilterType::HIGH_SHELF) {
-        y = sinOmega / 2.0 * sqrt((1.0 / gain + gain) * (1.0 / (double) qFactor - 1.0) + 2.0);
+        y = sinOmega / 2.0
+            * sqrt((1.0 / gain + gain) * (1.0 / (double) qFactor - 1.0) + 2.0);
         z = sqrt(gain) * 2.0 * y;
     } else if (param_7) {
         y = sinh(((double) qFactor * log(2.0) * omega / 2.0) / sinOmega) * sinOmega;

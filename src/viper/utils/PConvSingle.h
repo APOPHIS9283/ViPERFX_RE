@@ -2,8 +2,7 @@
 
 typedef struct PFFFT_Setup PFFFT_Setup;
 
-class PConvSingle
-{
+class PConvSingle {
 public:
     PConvSingle();
     ~PConvSingle();

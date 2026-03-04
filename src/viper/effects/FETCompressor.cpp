@@ -2,9 +2,25 @@
 #include "../constants.h"
 #include <cmath>
 
-static const float DEFAULT_FETCOMP_PARAMETERS[] = {1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000,
-                                                   1.000000, 0.514679, 1.000000, 0.384311, 1.000000, 0.500000,
-                                                   0.879450, 0.884311, 0.615689, 0.660964, 1.000000};
+static const float DEFAULT_FETCOMP_PARAMETERS[] = {
+    1.000000,
+    0.000000,
+    0.000000,
+    0.000000,
+    1.000000,
+    0.000000,
+    1.000000,
+    0.514679,
+    1.000000,
+    0.384311,
+    1.000000,
+    0.500000,
+    0.879450,
+    0.884311,
+    0.615689,
+    0.660964,
+    1.000000
+};
 
 static double calculate_exp_something(double param_1, double param_2) {
     return 1.0 - exp(-1.0 / (param_2 * param_1));
@@ -14,7 +30,10 @@ FETCompressor::FETCompressor() {
     this->samplingRate = VIPER_DEFAULT_SAMPLING_RATE;
 
     for (uint32_t i = 0; i < 17; i++) {
-        SetParameter((FETCompressor::Parameter) i, GetParameterDefault((FETCompressor::Parameter) i));
+        SetParameter(
+            (FETCompressor::Parameter) i,
+            GetParameterDefault((FETCompressor::Parameter) i)
+        );
     }
 
     Reset();
@@ -71,8 +90,10 @@ void FETCompressor::Process(float *samples, uint32_t size) {
         }
 
         this->smoothedThreshold =
-            this->smoothedThreshold + (this->threshold - this->smoothedThreshold) * this->smoothingCoeff;
-        this->smoothedGain = this->smoothedGain + this->smoothingCoeff * (this->gain - this->smoothedGain);
+            this->smoothedThreshold
+            + (this->threshold - this->smoothedThreshold) * this->smoothingCoeff;
+        this->smoothedGain =
+            this->smoothedGain + this->smoothingCoeff * (this->gain - this->smoothedGain);
     }
 }
 
@@ -86,7 +107,8 @@ double FETCompressor::ProcessSidechain(double in) {
     float releaseCoeff = this->release2;
     float adaptiveAttackTime = this->attack1;
 
-    float runningPeak = this->runningPeak + this->crest2 * ((float) in2 - this->runningPeak);
+    float runningPeak =
+        this->runningPeak + this->crest2 * ((float) in2 - this->runningPeak);
     float runningRMS = this->runningRMS + this->crest2 * ((float) in2 - this->runningRMS);
 
     if ((float) in2 < runningPeak) {
@@ -103,16 +125,19 @@ double FETCompressor::ProcessSidechain(double in) {
         if (adaptiveAttackTime <= 0.0f) {
             attackCoeff = 1.0f;
         } else {
-            attackCoeff = (float) calculate_exp_something(this->samplingRate, adaptiveAttackTime);
+            attackCoeff =
+                (float) calculate_exp_something(this->samplingRate, adaptiveAttackTime);
         }
     }
 
     if (this->autoRelease) {
-        float adaptiveReleaseTime = 2.0f * this->maxRelease / crestRatio - adaptiveAttackTime;
+        float adaptiveReleaseTime =
+            2.0f * this->maxRelease / crestRatio - adaptiveAttackTime;
         if (adaptiveReleaseTime <= 0.0f) {
             releaseCoeff = 1.0f;
         } else {
-            releaseCoeff = (float) calculate_exp_something(this->samplingRate, adaptiveReleaseTime);
+            releaseCoeff =
+                (float) calculate_exp_something(this->samplingRate, adaptiveReleaseTime);
         }
     }
 
@@ -157,7 +182,8 @@ double FETCompressor::ProcessSidechain(double in) {
 
     gainReduction *= ratioMul;
 
-    float relSmoothed = this->releaseSmoothGR + (gainReduction - this->releaseSmoothGR) * releaseCoeff;
+    float relSmoothed =
+        this->releaseSmoothGR + (gainReduction - this->releaseSmoothGR) * releaseCoeff;
     if (gainReduction <= relSmoothed) {
         gainReduction = relSmoothed;
     }
@@ -311,7 +337,9 @@ void FETCompressor::SetSamplingRate(uint32_t samplingRate) {
     this->samplingRate = samplingRate;
 
     for (uint32_t i = 0; i < 17; i++) {
-        SetParameter((FETCompressor::Parameter) i, GetParameter((FETCompressor::Parameter) i));
+        SetParameter(
+            (FETCompressor::Parameter) i, GetParameter((FETCompressor::Parameter) i)
+        );
     }
 
     Reset();

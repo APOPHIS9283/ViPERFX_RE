@@ -136,7 +136,8 @@ static bool ReadWavFile(const char *path, WavData *out) {
             return false;
         }
         for (uint32_t i = 0; i < totalSamples; i++) {
-            int32_t val = (tmp[i * 3] << 8) | (tmp[i * 3 + 1] << 16) | (tmp[i * 3 + 2] << 24);
+            int32_t val =
+                (tmp[i * 3] << 8) | (tmp[i * 3 + 1] << 16) | (tmp[i * 3 + 2] << 24);
             val >>= 8;
             samples[i] = (float) val / 8388608.0f;
         }
