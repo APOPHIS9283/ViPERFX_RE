@@ -739,6 +739,10 @@ void ViPER::DispatchCommand(
             );
             break;
         }
+        case PARAM_SPEAKER_CORRECTION_ENABLE: {
+            this->speakerCorrection.SetEnable(val1 != 0);
+            break;
+        }
     }
 }
 
