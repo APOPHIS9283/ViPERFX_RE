@@ -24,7 +24,4 @@ private:
     uint32_t length;
     uint32_t offset;
     uint32_t channels;
-
 };
-
-

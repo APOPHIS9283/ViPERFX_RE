@@ -18,5 +18,3 @@ private:
     uint32_t biggestCoeff;
     uint32_t sampleCounter;
 };
-
-

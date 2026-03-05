@@ -11,7 +11,6 @@ typedef struct {
     float y[4];
 } channel;
 
-
 class PolesFilter {
 public:
     PolesFilter();
@@ -33,5 +32,3 @@ public:
     uint32_t upper_freq;
     uint32_t samplingRate;
 };
-
-

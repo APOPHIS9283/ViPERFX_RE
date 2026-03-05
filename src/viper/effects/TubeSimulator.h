@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cstdint>
 #include <array>
+#include <cstdint>
 
 // Iscle: Verified with the latest version at 13/12/2022
 
@@ -17,4 +17,3 @@ private:
     std::array<double, 2> acc;
     bool enable;
 };
-

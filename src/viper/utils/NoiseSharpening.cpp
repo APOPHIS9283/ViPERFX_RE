@@ -36,7 +36,9 @@ void NoiseSharpening::Process(float *buffer, uint32_t size) {
 
 void NoiseSharpening::Reset() {
     for (int i = 0; i < 2; i++) {
-        this->filters[i].setLPF_BW((float) ((double) this->samplingRate / 2.0 - 1000.0), this->samplingRate);
+        this->filters[i].setLPF_BW(
+            (float) ((double) this->samplingRate / 2.0 - 1000.0), this->samplingRate
+        );
         this->filters[i].Mute();
         this->in[i] = 0.0;
     }

@@ -24,8 +24,7 @@ struct Crossfeed::Preset Cure::GetPreset() {
 }
 
 void Cure::Process(float *buffer, uint32_t size) {
-    if (!this->enabled)
-        return;
+    if (!this->enabled) return;
 
     this->crossfeed.ProcessFrames(buffer, size);
     this->passFilter.ProcessFrames(buffer, size);

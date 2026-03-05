@@ -1,6 +1,6 @@
 #include "DepthSurround.h"
-#include <cmath>
 #include "../constants.h"
+#include <cmath>
 
 DepthSurround::DepthSurround() {
     this->strength = 0;
@@ -21,8 +21,12 @@ void DepthSurround::Process(float *samples, uint32_t size) {
                 float sampleLeft = samples[2 * i];
                 float sampleRight = samples[2 * i + 1];
 
-                this->prev[0] = this->gain * this->timeConstDelay[0].ProcessSample(sampleLeft + this->prev[1]);
-                this->prev[1] = this->gain * this->timeConstDelay[1].ProcessSample(sampleRight + this->prev[0]);
+                this->prev[0] =
+                    this->gain
+                    * this->timeConstDelay[0].ProcessSample(sampleLeft + this->prev[1]);
+                this->prev[1] =
+                    this->gain
+                    * this->timeConstDelay[1].ProcessSample(sampleRight + this->prev[0]);
 
                 float l = this->prev[0] + sampleLeft;
                 float r = this->prev[1] + sampleRight;
@@ -38,8 +42,12 @@ void DepthSurround::Process(float *samples, uint32_t size) {
                 float sampleLeft = samples[2 * i];
                 float sampleRight = samples[2 * i + 1];
 
-                this->prev[0] = this->gain * this->timeConstDelay[0].ProcessSample(sampleLeft + this->prev[1]);
-                this->prev[1] = -this->gain * this->timeConstDelay[1].ProcessSample(sampleRight + this->prev[0]);
+                this->prev[0] =
+                    this->gain
+                    * this->timeConstDelay[0].ProcessSample(sampleLeft + this->prev[1]);
+                this->prev[1] =
+                    -this->gain
+                    * this->timeConstDelay[1].ProcessSample(sampleRight + this->prev[0]);
 
                 float l = this->prev[0] + sampleLeft;
                 float r = this->prev[1] + sampleRight;

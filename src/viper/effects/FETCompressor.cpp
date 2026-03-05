@@ -69,8 +69,7 @@ float FETCompressor::GetParameterDefault(FETCompressor::Parameter parameter) {
 }
 
 void FETCompressor::Process(float *samples, uint32_t size) {
-    if (!this->enable || size == 0)
-        return;
+    if (!this->enable || size == 0) return;
 
     for (uint32_t i = 0; i < size * 2; i += 2) {
         double inL = abs(samples[i]);

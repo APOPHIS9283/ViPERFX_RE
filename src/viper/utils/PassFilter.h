@@ -1,8 +1,8 @@
 #pragma once
 
-#include <cstdint>
 #include "IIR_NOrder_BW_LH.h"
 #include <array>
+#include <cstdint>
 
 class PassFilter {
 public:

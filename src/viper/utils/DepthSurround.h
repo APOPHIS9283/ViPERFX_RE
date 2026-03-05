@@ -1,8 +1,8 @@
 #pragma once
 
-#include <cstdint>
 #include "Biquad.h"
 #include "TimeConstDelay.h"
+#include <cstdint>
 
 class DepthSurround {
 public:

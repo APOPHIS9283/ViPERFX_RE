@@ -40,10 +40,8 @@ double PlaybackGain::AnalyseWave(float *samples, uint32_t size) {
 }
 
 void PlaybackGain::Process(float *samples, uint32_t size) {
-    if (!this->enable)
-        return;
-    if (size == 0)
-        return;
+    if (!this->enable) return;
+    if (size == 0) return;
 
     double analyzed = AnalyseWave(samples, size);
 

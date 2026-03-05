@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "IIR_1st.h"
 
 class NoiseSharpening {
@@ -20,6 +19,3 @@ public:
     uint32_t samplingRate;
     float gain;
 };
-
-
-

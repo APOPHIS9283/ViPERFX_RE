@@ -1,5 +1,5 @@
-#include <cstring>
 #include "FIR.h"
+#include <cstring>
 
 FIR::FIR() {
     this->coeffsSize = 0;
@@ -22,7 +22,11 @@ void FIR::FilterSamplesInterleaved(float *samples, uint32_t size, uint32_t chann
         memset(this->block.data() + size, 0, (this->blockLength - size) * sizeof(float));
     }
 
-    memcpy(this->offsetBlock.data() + this->coeffsSize - 1, this->block.data(), this->blockLength * sizeof(float));
+    memcpy(
+        this->offsetBlock.data() + this->coeffsSize - 1,
+        this->block.data(),
+        this->blockLength * sizeof(float)
+    );
 
     for (uint32_t i = 0; i < this->blockLength; i++) {
         float sample = 0.0f;
@@ -52,7 +56,9 @@ uint32_t FIR::GetBlockLength() {
     return this->blockLength;
 }
 
-int FIR::LoadCoefficients(const float *coeffs, uint32_t coeffsSize, uint32_t blockLength) {
+int FIR::LoadCoefficients(
+    const float *coeffs, uint32_t coeffsSize, uint32_t blockLength
+) {
     if (coeffs == nullptr || coeffsSize == 0 || blockLength == 0) return 0;
 
     this->offsetBlock = std::vector<float>(coeffsSize + blockLength + 1);
@@ -72,6 +78,10 @@ int FIR::LoadCoefficients(const float *coeffs, uint32_t coeffsSize, uint32_t blo
 
 void FIR::Reset() {
     if (this->coeffsSize + this->blockLength > 0) {
-        memset(this->offsetBlock.data(), 0, (this->coeffsSize + this->blockLength + 1) * sizeof(float));
+        memset(
+            this->offsetBlock.data(),
+            0,
+            (this->coeffsSize + this->blockLength + 1) * sizeof(float)
+        );
     }
 }

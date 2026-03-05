@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cstdint>
 #include "../utils/CRevModel.h"
+#include <cstdint>
 
 class Reverberation {
 public:
@@ -20,6 +20,3 @@ private:
     CRevModel model;
     bool enable;
 };
-
-
-

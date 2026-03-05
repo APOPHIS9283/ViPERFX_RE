@@ -26,7 +26,11 @@ uint32_t WaveBuffer::PopSamples(uint32_t size, bool resetIndex) {
 
     if (this->channels * size <= this->index) {
         this->index -= this->channels * size;
-        memmove(this->buffer.data(), this->buffer.data() + this->channels * size, this->index * sizeof(float));
+        memmove(
+            this->buffer.data(),
+            this->buffer.data() + this->channels * size,
+            this->index * sizeof(float)
+        );
         return size;
     }
 
@@ -47,7 +51,11 @@ uint32_t WaveBuffer::PopSamples(float *dest, uint32_t size, bool resetIndex) {
     if (this->channels * size <= this->index) {
         memcpy(dest, this->buffer.data(), this->channels * size * sizeof(float));
         this->index -= this->channels * size;
-        memmove(this->buffer.data(), this->buffer.data() + this->channels * size, this->index * sizeof(float));
+        memmove(
+            this->buffer.data(),
+            this->buffer.data() + this->channels * size,
+            this->index * sizeof(float)
+        );
         return size;
     }
 
@@ -67,7 +75,11 @@ int WaveBuffer::PushSamples(float *source, uint32_t size) {
         if (requiredSize > this->buffer.size()) {
             this->buffer.resize(requiredSize);
         }
-        memcpy(this->buffer.data() + this->index, source, this->channels * size * sizeof(float));
+        memcpy(
+            this->buffer.data() + this->index,
+            source,
+            this->channels * size * sizeof(float)
+        );
         this->index += this->channels * size;
     }
 
@@ -80,7 +92,9 @@ int WaveBuffer::PushZeros(uint32_t size) {
         if (requiredSize > this->buffer.size()) {
             this->buffer.resize(requiredSize);
         }
-        memset(this->buffer.data() + this->index, 0, this->channels * size * sizeof(float));
+        memset(
+            this->buffer.data() + this->index, 0, this->channels * size * sizeof(float)
+        );
         this->index += this->channels * size;
     }
 
@@ -95,7 +109,9 @@ float *WaveBuffer::PushZerosGetBuffer(uint32_t size) {
         if (requiredSize > this->buffer.size()) {
             this->buffer.resize(requiredSize);
         }
-        memset(this->buffer.data() + this->index, 0, this->channels * size * sizeof(float));
+        memset(
+            this->buffer.data() + this->index, 0, this->channels * size * sizeof(float)
+        );
         this->index += this->channels * size;
     }
 

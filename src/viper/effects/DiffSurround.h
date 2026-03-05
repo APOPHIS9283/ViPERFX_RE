@@ -1,8 +1,8 @@
 #pragma once
 
-#include <cstdint>
 #include "../utils/WaveBuffer.h"
 #include <array>
+#include <cstdint>
 
 class DiffSurround {
 public:
@@ -19,5 +19,3 @@ public:
     float delayTime;
     std::array<WaveBuffer, 2> buffers;
 };
-
-

@@ -1,12 +1,13 @@
 #include "PassFilter.h"
 #include "../constants.h"
 
-PassFilter::PassFilter() : filters({
-    IIR_NOrder_BW_LH(3),
-    IIR_NOrder_BW_LH(3),
-    IIR_NOrder_BW_LH(1),
-    IIR_NOrder_BW_LH(1)
-}) {
+PassFilter::PassFilter() :
+    filters(
+        {IIR_NOrder_BW_LH(3),
+         IIR_NOrder_BW_LH(3),
+         IIR_NOrder_BW_LH(1),
+         IIR_NOrder_BW_LH(1)}
+    ) {
     this->samplingRate = VIPER_DEFAULT_SAMPLING_RATE;
     Reset();
 }

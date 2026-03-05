@@ -1,9 +1,8 @@
 #pragma once
 
-
+#include "IIR_NOrder_BW_BP.h"
 #include "IIR_NOrder_BW_LH.h"
 #include "WaveBuffer.h"
-#include "IIR_NOrder_BW_BP.h"
 
 class HiFi {
 public:
@@ -28,5 +27,3 @@ public:
     float gain;
     uint32_t samplingRate;
 };
-
-

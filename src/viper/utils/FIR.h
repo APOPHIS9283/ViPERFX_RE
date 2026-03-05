@@ -21,5 +21,3 @@ private:
     uint32_t blockLength;
     bool hasCoefficients;
 };
-
-

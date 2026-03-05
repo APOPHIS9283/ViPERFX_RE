@@ -65,7 +65,6 @@ void HiFi::Reset() {
     this->buffers[0]->PushZeros(this->samplingRate / 400);
     this->buffers[1]->Reset();
     this->buffers[1]->PushZeros(this->samplingRate / 200);
-
 }
 
 void HiFi::SetClarity(float value) {

@@ -295,8 +295,7 @@ void Convolver::SetEnable(bool enabled) {
 }
 
 void Convolver::SetKernel(float *buf, uint32_t len) {
-    if (len < 16)
-        return;
+    if (len < 16) return;
 
     this->kernelCh1.Reset();
     this->kernelCh2.Reset();
@@ -314,13 +313,10 @@ void Convolver::SetKernel(float *buf, uint32_t len) {
 }
 
 void Convolver::SetKernel(const char *path) {
-    if (path == nullptr)
-        return;
-    if (strlen(path) == 0)
-        return;
+    if (path == nullptr) return;
+    if (strlen(path) == 0) return;
 
-    if (strcmp(path, this->kernelFilePath) == 0)
-        return;
+    if (strcmp(path, this->kernelFilePath) == 0) return;
 
     this->kernelCh1.Reset();
     this->kernelCh2.Reset();
@@ -392,10 +388,8 @@ void Convolver::SetKernel(const char *path) {
 }
 
 void Convolver::SetKernelBuffer(uint32_t param_1, float *buf, uint32_t len) {
-    if (buf == nullptr || len == 0)
-        return;
-    if (this->expectedSize == 0)
-        return;
+    if (buf == nullptr || len == 0) return;
+    if (this->expectedSize == 0) return;
 
     float *newArray = new float[this->currentSize + len];
     if (this->kernelBuffer != nullptr) {
@@ -408,8 +402,7 @@ void Convolver::SetKernelBuffer(uint32_t param_1, float *buf, uint32_t len) {
 }
 
 void Convolver::SetKernelStereo(float *param_1, float *param_2, uint32_t param_3) {
-    if (param_3 < 16)
-        return;
+    if (param_3 < 16) return;
 
     this->kernelCh1.Reset();
     this->kernelCh2.Reset();

@@ -18,5 +18,3 @@ private:
     float coeffLeft;
     float coeffRight;
 };
-
-

@@ -14,7 +14,9 @@ DynamicBass::DynamicBass() {
 
     this->filterX.SetPassFilter(this->lowFreqX, this->highFreqX);
     this->filterY.SetPassFilter(this->lowFreqY, this->highFreqY);
-    this->lowPass.SetLowPassParameter(55.f, this->samplingRate, this->qPeak / 666.f + 0.5f);
+    this->lowPass.SetLowPassParameter(
+        55.f, this->samplingRate, this->qPeak / 666.f + 0.5f
+    );
 }
 
 void DynamicBass::FilterSamples(float *samples, uint32_t size) {
@@ -36,7 +38,8 @@ void DynamicBass::FilterSamples(float *samples, uint32_t size) {
             this->filterY.DoFilterRight(this->bassGain * x4, &y4, &y5, &y6);
 
             samples[2 * i] = x2 + y3 + this->sideGainX * y2 + this->sideGainY * y1 + x3;
-            samples[2 * i + 1] = x5 + y6 + this->sideGainX * y5 + this->sideGainY * y4 + x6;
+            samples[2 * i + 1] =
+                x5 + y6 + this->sideGainX * y5 + this->sideGainY * y4 + x6;
         }
     }
 }
@@ -44,7 +47,9 @@ void DynamicBass::FilterSamples(float *samples, uint32_t size) {
 void DynamicBass::Reset() {
     this->filterX.Reset();
     this->filterY.Reset();
-    this->lowPass.SetLowPassParameter(55.0, this->samplingRate, this->qPeak / 666.0f + 0.5f);
+    this->lowPass.SetLowPassParameter(
+        55.0, this->samplingRate, this->qPeak / 666.0f + 0.5f
+    );
 }
 
 void DynamicBass::SetBassGain(float gain) {
@@ -56,7 +61,9 @@ void DynamicBass::SetBassGain(float gain) {
     }
     this->qPeak = (float) x;
 
-    this->lowPass.SetLowPassParameter(55.0, this->samplingRate, this->qPeak / 666.0f + 0.5f);
+    this->lowPass.SetLowPassParameter(
+        55.0, this->samplingRate, this->qPeak / 666.0f + 0.5f
+    );
 }
 
 void DynamicBass::SetFilterXPassFrequency(uint32_t low, uint32_t high) {
@@ -65,7 +72,9 @@ void DynamicBass::SetFilterXPassFrequency(uint32_t low, uint32_t high) {
 
     this->filterX.SetPassFilter(low, high);
     this->filterX.SetSamplingRate(this->samplingRate);
-    this->lowPass.SetLowPassParameter(55.0, this->samplingRate, this->qPeak / 666.0f + 0.5f);
+    this->lowPass.SetLowPassParameter(
+        55.0, this->samplingRate, this->qPeak / 666.0f + 0.5f
+    );
 }
 
 void DynamicBass::SetFilterYPassFrequency(uint32_t low, uint32_t high) {
@@ -74,7 +83,9 @@ void DynamicBass::SetFilterYPassFrequency(uint32_t low, uint32_t high) {
 
     this->filterY.SetPassFilter(low, high);
     this->filterY.SetSamplingRate(this->samplingRate);
-    this->lowPass.SetLowPassParameter(55.0, this->samplingRate, this->qPeak / 666.0f + 0.5f);
+    this->lowPass.SetLowPassParameter(
+        55.0, this->samplingRate, this->qPeak / 666.0f + 0.5f
+    );
 }
 
 void DynamicBass::SetSamplingRate(uint32_t samplingRate) {

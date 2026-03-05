@@ -1,8 +1,8 @@
 #pragma once
 
-#include <cstdint>
-#include "PolesFilter.h"
 #include "Biquad.h"
+#include "PolesFilter.h"
+#include <cstdint>
 
 class DynamicBass {
 public:

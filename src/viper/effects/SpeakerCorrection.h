@@ -1,9 +1,9 @@
 #pragma once
 
-#include <cstdint>
-#include "../utils/MultiBiquad.h"
 #include "../utils/Biquad.h"
+#include "../utils/MultiBiquad.h"
 #include <array>
+#include <cstdint>
 
 // Iscle: Verified with the latest version at 13/12/2022
 

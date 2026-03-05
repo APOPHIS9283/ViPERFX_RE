@@ -32,8 +32,7 @@ void PConvSingle::ConvolveInterleaved(float *buffer, int channel) {
 }
 
 void PConvSingle::ConvSegment(float *buffer, bool interleaved, int channel) {
-    if (!this->instanceUsable)
-        return;
+    if (!this->instanceUsable) return;
 
     float *input;
     if (interleaved) {
@@ -155,8 +154,7 @@ int PConvSingle::ProcessKernel(const float *kernel, int kernelSize, int unused) 
     this->segmentCount = (kernelSize + this->segmentSize - 1) / this->segmentSize;
 
     this->fftSetup = pffft_new_setup(this->fftSize, PFFFT_REAL);
-    if (this->fftSetup == nullptr)
-        return 0;
+    if (this->fftSetup == nullptr) return 0;
 
     this->fftWork = (float *) pffft_aligned_malloc(this->fftSize * sizeof(float));
     this->fftBuffer = (float *) pffft_aligned_malloc(this->fftSize * sizeof(float));
@@ -208,8 +206,7 @@ int PConvSingle::ProcessKernel(
 ) {
     // Scale kernel by gain factor before processing
     float *scaled = (float *) pffft_aligned_malloc(kernelSize * sizeof(float));
-    if (!scaled)
-        return 0;
+    if (!scaled) return 0;
     for (int i = 0; i < kernelSize; i++) {
         scaled[i] = kernel[i] * gain;
     }
@@ -273,8 +270,7 @@ void PConvSingle::ReleaseResources() {
 }
 
 void PConvSingle::Reset() {
-    if (!this->instanceUsable)
-        return;
+    if (!this->instanceUsable) return;
 
     for (int i = 0; i < this->segmentCount; i++) {
         memset(this->inputHistory[i], 0, this->fftSize * sizeof(float));

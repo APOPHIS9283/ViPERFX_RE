@@ -1,9 +1,9 @@
 #pragma once
 
-#include <cstdint>
 #include "../utils/Harmonic.h"
 #include "../utils/MultiBiquad.h"
 #include <array>
+#include <cstdint>
 
 class SpectrumExtend {
 public:
@@ -25,5 +25,3 @@ private:
     uint32_t referenceFreq;
     float exciter;
 };
-
-

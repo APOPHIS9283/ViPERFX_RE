@@ -1,5 +1,5 @@
-#include <cstring>
 #include "AdaptiveBuffer.h"
+#include <cstring>
 
 AdaptiveBuffer::AdaptiveBuffer(uint32_t channels, uint32_t length) {
     this->channels = channels;
@@ -49,7 +49,11 @@ int AdaptiveBuffer::PopFrames(float *frames, uint32_t length) {
         memcpy(frames, this->buffer.data(), length * this->channels * sizeof(float));
         this->offset = this->offset - length;
         if (this->offset != 0) {
-            memmove(this->buffer.data(), this->buffer.data() + (length * this->channels), this->offset * this->channels * sizeof(float));
+            memmove(
+                this->buffer.data(),
+                this->buffer.data() + (length * this->channels),
+                this->offset * this->channels * sizeof(float)
+            );
         }
     }
 
@@ -63,7 +67,11 @@ int AdaptiveBuffer::PushFrames(const float *frames, uint32_t length) {
             this->length = this->offset + length;
         }
 
-        memcpy(this->buffer.data() + (this->offset * this->channels), frames, length * this->channels * sizeof(float));
+        memcpy(
+            this->buffer.data() + (this->offset * this->channels),
+            frames,
+            length * this->channels * sizeof(float)
+        );
         this->offset = this->offset + length;
     }
 
@@ -76,7 +84,11 @@ int AdaptiveBuffer::PushZero(uint32_t length) {
         this->length = this->offset + length;
     }
 
-    memset(this->buffer.data() + (this->offset * this->channels), 0, length * this->channels * sizeof(float));
+    memset(
+        this->buffer.data() + (this->offset * this->channels),
+        0,
+        length * this->channels * sizeof(float)
+    );
     this->offset = this->offset + length;
 
     return 1;

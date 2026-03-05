@@ -2,16 +2,16 @@
 #include "../constants.h"
 
 static const float SPECTRUM_HARMONICS[10] = {
-        0.02f,
-        0.0f,
-        0.02f,
-        0.0f,
-        0.02f,
-        0.0f,
-        0.02f,
-        0.0f,
-        0.02f,
-        0.0f,
+    0.02f,
+    0.0f,
+    0.02f,
+    0.0f,
+    0.02f,
+    0.0f,
+    0.02f,
+    0.0f,
+    0.02f,
+    0.0f,
 };
 
 SpectrumExtend::SpectrumExtend() {
@@ -41,15 +41,39 @@ void SpectrumExtend::Process(float *samples, uint32_t size) {
 }
 
 void SpectrumExtend::Reset() {
-    this->highpass[0].RefreshFilter(MultiBiquad::FilterType::HIGH_PASS, 0.0, (float) this->referenceFreq, this->samplingRate,
-                                    0.717, false);
-    this->highpass[1].RefreshFilter(MultiBiquad::FilterType::HIGH_PASS, 0.0, (float) this->referenceFreq, this->samplingRate,
-                                    0.717, false);
+    this->highpass[0].RefreshFilter(
+        MultiBiquad::FilterType::HIGH_PASS,
+        0.0,
+        (float) this->referenceFreq,
+        this->samplingRate,
+        0.717,
+        false
+    );
+    this->highpass[1].RefreshFilter(
+        MultiBiquad::FilterType::HIGH_PASS,
+        0.0,
+        (float) this->referenceFreq,
+        this->samplingRate,
+        0.717,
+        false
+    );
 
-    this->lowpass[0].RefreshFilter(MultiBiquad::FilterType::LOW_PASS, 0.0, (float) this->samplingRate / 2.0f - 2000.0f,
-                                   this->samplingRate, 0.717, false);
-    this->lowpass[1].RefreshFilter(MultiBiquad::FilterType::LOW_PASS, 0.0, (float) this->samplingRate / 2.0f - 2000.0f,
-                                   this->samplingRate, 0.717, false);
+    this->lowpass[0].RefreshFilter(
+        MultiBiquad::FilterType::LOW_PASS,
+        0.0,
+        (float) this->samplingRate / 2.0f - 2000.0f,
+        this->samplingRate,
+        0.717,
+        false
+    );
+    this->lowpass[1].RefreshFilter(
+        MultiBiquad::FilterType::LOW_PASS,
+        0.0,
+        (float) this->samplingRate / 2.0f - 2000.0f,
+        this->samplingRate,
+        0.717,
+        false
+    );
 
     this->harmonics[0].Reset();
     this->harmonics[1].Reset();

@@ -1,8 +1,8 @@
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <vector>
-#include <array>
 
 class ViPERDDC {
 public:
@@ -32,5 +32,3 @@ private:
 
     void ReleaseResources();
 };
-
-

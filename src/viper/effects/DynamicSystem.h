@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cstdint>
 #include "../utils/DynamicBass.h"
+#include <cstdint>
 
 class DynamicSystem {
 public:
@@ -21,5 +21,3 @@ private:
     uint32_t samplingRate;
     bool enable;
 };
-
-

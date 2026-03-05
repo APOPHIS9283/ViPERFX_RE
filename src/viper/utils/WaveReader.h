@@ -14,8 +14,7 @@ struct WavData {
 };
 
 static bool ReadWavFile(const char *path, WavData *out) {
-    if (path == nullptr || out == nullptr)
-        return false;
+    if (path == nullptr || out == nullptr) return false;
 
     FILE *fp = fopen(path, "rb");
     if (fp == nullptr) {

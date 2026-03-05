@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cstdint>
 #include "MultiBiquad.h"
+#include <cstdint>
 
 class Subwoofer {
 public:
@@ -15,5 +15,3 @@ private:
     MultiBiquad peakLow[2];
     MultiBiquad lowpass[2];
 };
-
-

@@ -10,12 +10,8 @@ Biquad::Biquad() {
 }
 
 double Biquad::ProcessSample(double sample) {
-    double out =
-            sample * this->b0 +
-            this->x1 * this->b1 +
-            this->x2 * this->b2 +
-            this->y1 * this->a1 +
-            this->y2 * this->a2;
+    double out = sample * this->b0 + this->x1 * this->b1 + this->x2 * this->b2
+                 + this->y1 * this->a1 + this->y2 * this->a2;
 
     this->x2 = this->x1;
     this->x1 = sample;
@@ -49,7 +45,8 @@ void Biquad::SetBandPassParameter(float frequency, uint32_t samplingRate, float 
     double a2 = 1.0 - alpha;
     double b0 = sinOmega / 2.0; // Reference biquad implementation would use alpha here
     double b1 = 0.0;
-    double b2 = -(sinOmega / 2.0); // Reference biquad implementation would use -alpha here
+    double b2 =
+        -(sinOmega / 2.0); // Reference biquad implementation would use -alpha here
 
     SetCoeffs(a0, a1, a2, b0, b1, b2);
 }
@@ -67,8 +64,9 @@ void Biquad::SetCoeffs(double a0, double a1, double a2, double b0, double b1, do
     this->b2 = b2 / a0;
 }
 
-void
-Biquad::SetHighPassParameter(float frequency, uint32_t samplingRate, double dbGain, float qFactor, double param_6) {
+void Biquad::SetHighPassParameter(
+    float frequency, uint32_t samplingRate, double dbGain, float qFactor, double param_6
+) {
     double omega = (2.0 * M_PI * (double) frequency) / (double) samplingRate;
     double sinOmega = sin(omega);
     double cosOmega = cos(omega);
@@ -76,7 +74,8 @@ Biquad::SetHighPassParameter(float frequency, uint32_t samplingRate, double dbGa
     double A = pow(10.0, dbGain / 40.0);
     double sqrtA = sqrt(A);
 
-    double z = sinOmega / 2.0 * sqrt((1.0 / A + A) * (1.0 / (double) qFactor - 1.0) + 2.0);
+    double z =
+        sinOmega / 2.0 * sqrt((1.0 / A + A) * (1.0 / (double) qFactor - 1.0) + 2.0);
 
     double a0 = (A + 1.0) - (A - 1.0) * cosOmega + (sqrtA * 2.0) * z;
     double a1 = ((A - 1.0) - (A + 1.0) * cosOmega) * 2.0;

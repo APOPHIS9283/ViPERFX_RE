@@ -42,7 +42,6 @@ PenaltyBreakBeforeFirstCallParameter: 0
 AlwaysBreakTemplateDeclarations: Yes
 
 BreakConstructorInitializers: AfterColon
-BreakBeforeConstructorInitializerComma: true
 PackConstructorInitializers: Never
 ConstructorInitializerIndentWidth: 4
 

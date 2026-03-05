@@ -1,5 +1,5 @@
-#include <cmath>
 #include "IIR_1st.h"
+#include <cmath>
 
 // Seems to be taken from https://github.com/michaelwillis/dragonfly-reverb/blob/master/common/freeverb/efilter.cpp
 // Or similar sources
@@ -21,9 +21,10 @@ void IIR_1st::SetCoefficients(float b0, float b1, float a1) {
     this->a1 = a1;
 }
 
-#define angle(freq, samplingRate) (expf(-1*(float)M_PI*(freq)/((float)(samplingRate)/2.f)))
-#define omega() (2.f * (float)M_PI * frequency / (float)samplingRate)
-#define omega_2() ((float)M_PI * frequency / (float)samplingRate)
+#define angle(freq, samplingRate)                                                        \
+    (expf(-1 * (float) M_PI * (freq) / ((float) (samplingRate) / 2.f)))
+#define omega() (2.f * (float) M_PI * frequency / (float) samplingRate)
+#define omega_2() ((float) M_PI * frequency / (float) samplingRate)
 
 void IIR_1st::setHPF_A(float frequency, uint32_t samplingRate) {
     this->a1 = angle(frequency, samplingRate);
@@ -52,7 +53,8 @@ void IIR_1st::setHPFwLPS_A(float frequency, uint32_t samplingRate) {
     this->b1 = angle(frequency, samplingRate);
     float norm = (1 - this->a1) / fabsf(this->b0 + this->b1);
     this->b0 *= norm;
-    this->b1 *= norm;;
+    this->b1 *= norm;
+    ;
 }
 
 void IIR_1st::setHSF_A(float f1, float f2, uint32_t samplingRate) {

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <cstdint>
 #include "../utils/Biquad.h"
+#include "../utils/Polyphase.h"
 #include "../utils/Subwoofer.h"
 #include "../utils/WaveBuffer.h"
-#include "../utils/Polyphase.h"
+#include <cstdint>
 
 // Iscle: Verified with the latest version at 13/12/2022
 
@@ -39,5 +39,3 @@ private:
     uint32_t speaker;
     float bassFactor;
 };
-
-

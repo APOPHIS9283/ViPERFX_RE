@@ -23,6 +23,3 @@ private:
     uint32_t bufferSize;
     uint32_t bufferIndex;
 };
-
-
-

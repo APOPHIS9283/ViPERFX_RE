@@ -30,8 +30,7 @@ float SoftwareLimiter::Process(float sample) {
 
     abs_sample = std::abs(sample);
     if (abs_sample < this->gate) {
-        if (this->ready)
-            goto LAB_0006d86c;
+        if (this->ready) goto LAB_0006d86c;
         uVar8 = this->writeIndex;
     } else {
         if (!this->ready) {

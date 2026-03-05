@@ -12,7 +12,13 @@ public:
     void Reset();
     void SetBandPassParameter(float frequency, uint32_t samplingRate, float qFactor);
     void SetCoeffs(double a0, double a1, double a2, double b0, double b1, double b2);
-    void SetHighPassParameter(float frequency, uint32_t samplingRate, double dbGain, float qFactor, double param_6);
+    void SetHighPassParameter(
+        float frequency,
+        uint32_t samplingRate,
+        double dbGain,
+        float qFactor,
+        double param_6
+    );
     void SetLowPassParameter(float frequency, uint32_t samplingRate, float qFactor);
 
 private:

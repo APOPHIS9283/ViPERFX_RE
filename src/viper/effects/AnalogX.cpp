@@ -1,18 +1,9 @@
 #include "AnalogX.h"
-#include <cstring>
 #include "../constants.h"
+#include <cstring>
 
 static const float ANALOGX_HARMONICS[] = {
-        0.01,
-        0.02,
-        0.0001,
-        0.001,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
+    0.01, 0.02, 0.0001, 0.001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 };
 
 AnalogX::AnalogX() {
@@ -50,11 +41,19 @@ void AnalogX::Process(float *samples, uint32_t size) {
 }
 
 void AnalogX::Reset() {
-    this->highPass[0].RefreshFilter(MultiBiquad::FilterType::HIGH_PASS, 0.0, 240.0, this->samplingRate, 0.717, false);
-    this->highPass[1].RefreshFilter(MultiBiquad::FilterType::HIGH_PASS, 0.0, 240.0, this->samplingRate, 0.717, false);
+    this->highPass[0].RefreshFilter(
+        MultiBiquad::FilterType::HIGH_PASS, 0.0, 240.0, this->samplingRate, 0.717, false
+    );
+    this->highPass[1].RefreshFilter(
+        MultiBiquad::FilterType::HIGH_PASS, 0.0, 240.0, this->samplingRate, 0.717, false
+    );
 
-    this->peak[0].RefreshFilter(MultiBiquad::FilterType::PEAK, 0.58, 633.0, this->samplingRate, 6.28, true);
-    this->peak[1].RefreshFilter(MultiBiquad::FilterType::PEAK, 0.58, 633.0, this->samplingRate, 6.28, true);
+    this->peak[0].RefreshFilter(
+        MultiBiquad::FilterType::PEAK, 0.58, 633.0, this->samplingRate, 6.28, true
+    );
+    this->peak[1].RefreshFilter(
+        MultiBiquad::FilterType::PEAK, 0.58, 633.0, this->samplingRate, 6.28, true
+    );
 
     this->harmonic[0].Reset();
     this->harmonic[1].Reset();
@@ -66,8 +65,22 @@ void AnalogX::Reset() {
 
             this->gain = 0.6;
 
-            this->lowPass[0].RefreshFilter(MultiBiquad::FilterType::LOW_PASS, 0.0, 19650.0, this->samplingRate, 0.717, false);
-            this->lowPass[1].RefreshFilter(MultiBiquad::FilterType::LOW_PASS, 0.0, 19650.0, this->samplingRate, 0.717, false);
+            this->lowPass[0].RefreshFilter(
+                MultiBiquad::FilterType::LOW_PASS,
+                0.0,
+                19650.0,
+                this->samplingRate,
+                0.717,
+                false
+            );
+            this->lowPass[1].RefreshFilter(
+                MultiBiquad::FilterType::LOW_PASS,
+                0.0,
+                19650.0,
+                this->samplingRate,
+                0.717,
+                false
+            );
             break;
         }
         case 1: {
@@ -76,8 +89,22 @@ void AnalogX::Reset() {
 
             this->gain = 1.2;
 
-            this->lowPass[0].RefreshFilter(MultiBiquad::FilterType::LOW_PASS, 0.0, 18233.0, this->samplingRate, 0.717, false);
-            this->lowPass[1].RefreshFilter(MultiBiquad::FilterType::LOW_PASS, 0.0, 18233.0, this->samplingRate, 0.717, false);
+            this->lowPass[0].RefreshFilter(
+                MultiBiquad::FilterType::LOW_PASS,
+                0.0,
+                18233.0,
+                this->samplingRate,
+                0.717,
+                false
+            );
+            this->lowPass[1].RefreshFilter(
+                MultiBiquad::FilterType::LOW_PASS,
+                0.0,
+                18233.0,
+                this->samplingRate,
+                0.717,
+                false
+            );
             break;
         }
         case 2: {
@@ -86,8 +113,22 @@ void AnalogX::Reset() {
 
             this->gain = 2.4;
 
-            this->lowPass[0].RefreshFilter(MultiBiquad::FilterType::LOW_PASS, 0.0, 16307.0, this->samplingRate, 0.717, false);
-            this->lowPass[1].RefreshFilter(MultiBiquad::FilterType::LOW_PASS, 0.0, 16307.0, this->samplingRate, 0.717, false);
+            this->lowPass[0].RefreshFilter(
+                MultiBiquad::FilterType::LOW_PASS,
+                0.0,
+                16307.0,
+                this->samplingRate,
+                0.717,
+                false
+            );
+            this->lowPass[1].RefreshFilter(
+                MultiBiquad::FilterType::LOW_PASS,
+                0.0,
+                16307.0,
+                this->samplingRate,
+                0.717,
+                false
+            );
             break;
         }
     }

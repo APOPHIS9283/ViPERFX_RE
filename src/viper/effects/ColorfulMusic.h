@@ -1,8 +1,8 @@
 #pragma once
 
-#include <cstdint>
-#include "../utils/Stereo3DSurround.h"
 #include "../utils/DepthSurround.h"
+#include "../utils/Stereo3DSurround.h"
+#include <cstdint>
 
 class ColorfulMusic {
 public:
@@ -21,7 +21,4 @@ private:
     DepthSurround depthSurround;
     uint32_t samplingRate;
     bool enabled;
-
 };
-
-

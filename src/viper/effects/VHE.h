@@ -1,8 +1,8 @@
 #pragma once
 
-#include <cstdint>
 #include "../utils/PConvSingle.h"
 #include "../utils/WaveBuffer.h"
+#include <cstdint>
 
 class VHE {
 public:
@@ -24,5 +24,3 @@ private:
     uint32_t effectLevel;
     uint32_t convSize;
 };
-
-

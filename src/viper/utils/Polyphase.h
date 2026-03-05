@@ -1,8 +1,8 @@
 #pragma once
 
-#include <cstdint>
 #include "FIR.h"
 #include "WaveBuffer.h"
+#include <cstdint>
 
 class Polyphase {
 public:
@@ -21,5 +21,3 @@ private:
     float buffer[0x7e0];
     uint32_t samplingRate;
 };
-
-

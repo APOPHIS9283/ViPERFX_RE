@@ -1,9 +1,9 @@
 #pragma once
 
-#include <cstdint>
-#include "../utils/NoiseSharpening.h"
 #include "../utils/HiFi.h"
 #include "../utils/HighShelf.h"
+#include "../utils/NoiseSharpening.h"
+#include <cstdint>
 
 // Iscle: Verified with the latest version at 13/12/2022
 
@@ -34,5 +34,3 @@ private:
     uint32_t samplingRate;
     float clarityGainPercent;
 };
-
-

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <cstdint>
 #include "../utils/Harmonic.h"
 #include "../utils/MultiBiquad.h"
 #include <array>
+#include <cstdint>
 
 class AnalogX {
 public:
@@ -27,5 +27,3 @@ private:
     uint32_t samplingRate;
     bool enable;
 };
-
-
