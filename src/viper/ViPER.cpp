@@ -107,6 +107,7 @@ void ViPER::process(std::vector<float> &buffer, uint32_t size) {
 
         if (!this->waveBuffer.PushSamples(buffer.data(), size)) {
             this->waveBuffer.Reset();
+            memset(buffer.data(), 0, size * 2 * sizeof(float));
             return;
         }
 
@@ -118,6 +119,7 @@ void ViPER::process(std::vector<float> &buffer, uint32_t size) {
         if (!this->adaptiveBuffer.PushZero(ret)) {
             this->waveBuffer.Reset();
             this->adaptiveBuffer.FlushBuffer();
+            memset(buffer.data(), 0, size * 2 * sizeof(float));
             return;
         }
 
@@ -137,6 +139,7 @@ void ViPER::process(std::vector<float> &buffer, uint32_t size) {
             tmpBufSize = size;
         } else {
             this->adaptiveBuffer.FlushBuffer();
+            memset(buffer.data(), 0, size * 2 * sizeof(float));
             return;
         }
     }
@@ -151,7 +154,7 @@ void ViPER::process(std::vector<float> &buffer, uint32_t size) {
         this->reverberation.Process(tmpBuf, tmpBufSize);
         this->speakerCorrection.Process(tmpBuf, tmpBufSize);
         this->playbackGain.Process(tmpBuf, tmpBufSize);
-        this->fetCompressor.Process(tmpBuf, tmpBufSize); // TODO: enable check
+        this->fetCompressor.Process(tmpBuf, tmpBufSize);
         this->dynamicSystem.Process(tmpBuf, tmpBufSize);
         this->viperBass.Process(tmpBuf, tmpBufSize);
         this->viperClarity.Process(tmpBuf, tmpBufSize);
@@ -174,6 +177,7 @@ void ViPER::process(std::vector<float> &buffer, uint32_t size) {
 
         if (!this->adaptiveBuffer.PopFrames(buffer.data(), tmpBufSize)) {
             this->adaptiveBuffer.FlushBuffer();
+            memset(buffer.data(), 0, size * 2 * sizeof(float));
             return;
         }
 
@@ -211,7 +215,7 @@ void ViPER::DispatchCommand(
             break;
         }
         case PARAM_CONVOLUTION_ENABLE: {
-            //            this->convolver.SetEnabled(val1 != 0);
+            this->convolver.SetEnable(val1 != 0);
             break;
         } // 0x10002
         case PARAM_CONVOLUTION_SET_KERNEL: {
@@ -224,12 +228,15 @@ void ViPER::DispatchCommand(
             break;
         } // 0x10003
         case PARAM_CONVOLUTION_PREPARE_BUFFER: {
+            this->convolver.PrepareKernelBuffer(val1, val2, val3);
             break;
         } // 0x10004
         case PARAM_CONVOLUTION_SET_BUFFER: {
+            this->convolver.SetKernelBuffer(val1, (float *) arr, arrSize);
             break;
         } // 0x10005
         case PARAM_CONVOLUTION_COMMIT_BUFFER: {
+            this->convolver.CommitKernelBuffer(val1, val2, val3);
             break;
         } // 0x10006
         case PARAM_CONVOLUTION_CROSS_CHANNEL: {
@@ -454,69 +461,276 @@ void ViPER::DispatchCommand(
             this->softwareLimiters[1].SetGate((float) val1 / 100.0f);
             break;
         } // 0x10034
-        case PARAM_SPEAKER_OPTIMIZATION: {
-            this->speakerCorrection.SetEnable(val1 != 0);
+        case PARAM_SPKFX_CONVOLUTION_ENABLE: {
+            this->convolver.SetEnable(val1 != 0);
             break;
-        } // 0x10043
+        }
+        case PARAM_SPKFX_CONVOLUTION_UPDATE_KERNEL: {
+            if (arrSize > 0 && arr != nullptr) {
+                char path[256];
+                memset(path, 0, sizeof(path));
+                memcpy(path, arr, arrSize < 255 ? arrSize : 255);
+                this->convolver.SetKernel(path);
+            }
+            break;
+        }
+        case PARAM_SPKFX_CONVOLUTION_PREPARE_BUFFER: {
+            this->convolver.PrepareKernelBuffer(val1, val2, val3);
+            break;
+        }
+        case PARAM_SPKFX_CONVOLUTION_SET_BUFFER: {
+            this->convolver.SetKernelBuffer(val1, (float *) arr, arrSize);
+            break;
+        }
+        case PARAM_SPKFX_CONVOLUTION_COMMIT_BUFFER: {
+            this->convolver.CommitKernelBuffer(val1, val2, val3);
+            break;
+        }
+        case PARAM_SPKFX_CONVOLUTION_CROSS_CHANNEL: {
+            this->convolver.SetCrossChannel((float) val1 / 100.0f);
+            break;
+        }
+        case PARAM_SPKFX_FIR_EQUALIZER_ENABLE: {
+            this->iirFilter.SetEnable(val1 != 0);
+            break;
+        }
+        case PARAM_SPKFX_FIR_EQUALIZER_BAND_LEVEL: {
+            this->iirFilter.SetBandLevel((uint32_t) val1, (float) val2 / 100.0f);
+            break;
+        }
+        case PARAM_SPKFX_REVERBERATION_ENABLE: {
+            this->reverberation.SetEnable(val1 != 0);
+            break;
+        }
+        case PARAM_SPKFX_REVERBERATION_ROOM_SIZE: {
+            this->reverberation.SetRoomSize((float) val1 / 100.0f);
+            break;
+        }
+        case PARAM_SPKFX_REVERBERATION_ROOM_WIDTH: {
+            this->reverberation.SetWidth((float) val1 / 100.0f);
+            break;
+        }
+        case PARAM_SPKFX_REVERBERATION_ROOM_DAMPENING: {
+            this->reverberation.SetDamp((float) val1 / 100.0f);
+            break;
+        }
+        case PARAM_SPKFX_REVERBERATION_ROOM_WET_SIGNAL: {
+            this->reverberation.SetWet((float) val1 / 100.0f);
+            break;
+        }
+        case PARAM_SPKFX_REVERBERATION_ROOM_DRY_SIGNAL: {
+            this->reverberation.SetDry((float) val1 / 100.0f);
+            break;
+        }
+        case PARAM_SPKFX_AGC_ENABLE: {
+            this->playbackGain.SetEnable(val1 != 0);
+            break;
+        }
+        case PARAM_SPKFX_AGC_RATIO: {
+            this->playbackGain.SetRatio((float) val1 / 100.0f);
+            break;
+        }
+        case PARAM_SPKFX_AGC_VOLUME: {
+            this->playbackGain.SetVolume((float) val1 / 100.0f);
+            break;
+        }
+        case PARAM_SPKFX_AGC_MAX_SCALER: {
+            this->playbackGain.SetMaxGainFactor((float) val1 / 100.0f);
+            break;
+        }
+        case PARAM_SPKFX_OUTPUT_VOLUME: {
+            this->frameScale = (float) val1 / 100.0f;
+            break;
+        }
+        case PARAM_SPKFX_LIMITER_THRESHOLD: {
+            this->softwareLimiters[0].SetGate((float) val1 / 100.0f);
+            this->softwareLimiters[1].SetGate((float) val1 / 100.0f);
+            break;
+        }
         case PARAM_FET_COMPRESSOR_ENABLE: {
+            this->fetCompressor.SetParameter(
+                FETCompressor::ENABLE, (float) val1 / 100.0f
+            );
             break;
         } // 0x10049
         case PARAM_FET_COMPRESSOR_THRESHOLD: {
-            break;
-        } // 0x1004A
-        case PARAM_FET_COMPRESSOR_RATIO: {
             this->fetCompressor.SetParameter(
                 FETCompressor::THRESHOLD, (float) val1 / 100.0f
             );
             break;
+        } // 0x1004A
+        case PARAM_FET_COMPRESSOR_RATIO: {
+            this->fetCompressor.SetParameter(FETCompressor::RATIO, (float) val1 / 100.0f);
+            break;
         } // 0x1004B
         case PARAM_FET_COMPRESSOR_KNEE: {
+            this->fetCompressor.SetParameter(FETCompressor::KNEE, (float) val1 / 100.0f);
             break;
         } // 0x1004C
         case PARAM_FET_COMPRESSOR_AUTO_KNEE: {
+            this->fetCompressor.SetParameter(
+                FETCompressor::AUTO_KNEE, (float) val1 / 100.0f
+            );
             break;
         } // 0x1004D
         case PARAM_FET_COMPRESSOR_GAIN: {
+            this->fetCompressor.SetParameter(FETCompressor::GAIN, (float) val1 / 100.0f);
             break;
         } // 0x1004E
         case PARAM_FET_COMPRESSOR_AUTO_GAIN: {
-            this->fetCompressor.SetParameter(FETCompressor::GAIN, (float) val1 / 100.0f);
+            this->fetCompressor.SetParameter(
+                FETCompressor::AUTO_GAIN, (float) val1 / 100.0f
+            );
             break;
         } // 0x1004F
         case PARAM_FET_COMPRESSOR_ATTACK: {
+            this->fetCompressor.SetParameter(
+                FETCompressor::ATTACK, (float) val1 / 100.0f
+            );
             break;
         } // 0x10050
         case PARAM_FET_COMPRESSOR_AUTO_ATTACK: {
+            this->fetCompressor.SetParameter(
+                FETCompressor::AUTO_ATTACK, (float) val1 / 100.0f
+            );
             break;
         } // 0x10051
         case PARAM_FET_COMPRESSOR_RELEASE: {
+            this->fetCompressor.SetParameter(
+                FETCompressor::RELEASE, (float) val1 / 100.0f
+            );
             break;
         } // 0x10052
         case PARAM_FET_COMPRESSOR_AUTO_RELEASE: {
+            this->fetCompressor.SetParameter(
+                FETCompressor::AUTO_RELEASE, (float) val1 / 100.0f
+            );
             break;
         } // 0x10053
         case PARAM_FET_COMPRESSOR_KNEE_MULTI: {
+            this->fetCompressor.SetParameter(
+                FETCompressor::KNEE_MULTI, (float) val1 / 100.0f
+            );
             break;
         } // 0x10054
         case PARAM_FET_COMPRESSOR_MAX_ATTACK: {
-            break;
-        } // 0x10055
-        case PARAM_FET_COMPRESSOR_MAX_RELEASE: {
             this->fetCompressor.SetParameter(
                 FETCompressor::MAX_ATTACK, (float) val1 / 100.0f
             );
             break;
+        } // 0x10055
+        case PARAM_FET_COMPRESSOR_MAX_RELEASE: {
+            this->fetCompressor.SetParameter(
+                FETCompressor::MAX_RELEASE, (float) val1 / 100.0f
+            );
+            break;
         } // 0x10056
         case PARAM_FET_COMPRESSOR_CREST: {
+            this->fetCompressor.SetParameter(FETCompressor::CREST, (float) val1 / 100.0f);
             break;
         } // 0x10057
         case PARAM_FET_COMPRESSOR_ADAPT: {
+            this->fetCompressor.SetParameter(FETCompressor::ADAPT, (float) val1 / 100.0f);
             break;
         } // 0x10058
         case PARAM_FET_COMPRESSOR_NO_CLIP: {
-            this->fetCompressor.SetParameter(FETCompressor::ADAPT, (float) val1 / 100.0f);
+            this->fetCompressor.SetParameter(
+                FETCompressor::NO_CLIP, (float) val1 / 100.0f
+            );
             break;
         } // 0x10059
+        case PARAM_SPKFX_FET_COMPRESSOR_ENABLE: {
+            this->fetCompressor.SetParameter(
+                FETCompressor::ENABLE, (float) val1 / 100.0f
+            );
+            break;
+        }
+        case PARAM_SPKFX_FET_COMPRESSOR_THRESHOLD: {
+            this->fetCompressor.SetParameter(
+                FETCompressor::THRESHOLD, (float) val1 / 100.0f
+            );
+            break;
+        }
+        case PARAM_SPKFX_FET_COMPRESSOR_RATIO: {
+            this->fetCompressor.SetParameter(FETCompressor::RATIO, (float) val1 / 100.0f);
+            break;
+        }
+        case PARAM_SPKFX_FET_COMPRESSOR_KNEE: {
+            this->fetCompressor.SetParameter(FETCompressor::KNEE, (float) val1 / 100.0f);
+            break;
+        }
+        case PARAM_SPKFX_FET_COMPRESSOR_AUTO_KNEE: {
+            this->fetCompressor.SetParameter(
+                FETCompressor::AUTO_KNEE, (float) val1 / 100.0f
+            );
+            break;
+        }
+        case PARAM_SPKFX_FET_COMPRESSOR_GAIN: {
+            this->fetCompressor.SetParameter(FETCompressor::GAIN, (float) val1 / 100.0f);
+            break;
+        }
+        case PARAM_SPKFX_FET_COMPRESSOR_AUTO_GAIN: {
+            this->fetCompressor.SetParameter(
+                FETCompressor::AUTO_GAIN, (float) val1 / 100.0f
+            );
+            break;
+        }
+        case PARAM_SPKFX_FET_COMPRESSOR_ATTACK: {
+            this->fetCompressor.SetParameter(
+                FETCompressor::ATTACK, (float) val1 / 100.0f
+            );
+            break;
+        }
+        case PARAM_SPKFX_FET_COMPRESSOR_AUTO_ATTACK: {
+            this->fetCompressor.SetParameter(
+                FETCompressor::AUTO_ATTACK, (float) val1 / 100.0f
+            );
+            break;
+        }
+        case PARAM_SPKFX_FET_COMPRESSOR_RELEASE: {
+            this->fetCompressor.SetParameter(
+                FETCompressor::RELEASE, (float) val1 / 100.0f
+            );
+            break;
+        }
+        case PARAM_SPKFX_FET_COMPRESSOR_AUTO_RELEASE: {
+            this->fetCompressor.SetParameter(
+                FETCompressor::AUTO_RELEASE, (float) val1 / 100.0f
+            );
+            break;
+        }
+        case PARAM_SPKFX_FET_COMPRESSOR_KNEE_MULTI: {
+            this->fetCompressor.SetParameter(
+                FETCompressor::KNEE_MULTI, (float) val1 / 100.0f
+            );
+            break;
+        }
+        case PARAM_SPKFX_FET_COMPRESSOR_MAX_ATTACK: {
+            this->fetCompressor.SetParameter(
+                FETCompressor::MAX_ATTACK, (float) val1 / 100.0f
+            );
+            break;
+        }
+        case PARAM_SPKFX_FET_COMPRESSOR_MAX_RELEASE: {
+            this->fetCompressor.SetParameter(
+                FETCompressor::MAX_RELEASE, (float) val1 / 100.0f
+            );
+            break;
+        }
+        case PARAM_SPKFX_FET_COMPRESSOR_CREST: {
+            this->fetCompressor.SetParameter(FETCompressor::CREST, (float) val1 / 100.0f);
+            break;
+        }
+        case PARAM_SPKFX_FET_COMPRESSOR_ADAPT: {
+            this->fetCompressor.SetParameter(FETCompressor::ADAPT, (float) val1 / 100.0f);
+            break;
+        }
+        case PARAM_SPKFX_FET_COMPRESSOR_NO_CLIP: {
+            this->fetCompressor.SetParameter(
+                FETCompressor::NO_CLIP, (float) val1 / 100.0f
+            );
+            break;
+        }
     }
 }
 
