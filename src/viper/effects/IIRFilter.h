@@ -12,6 +12,7 @@ public:
 
     void Process(float *samples, uint32_t size);
     void Reset();
+    void SetBandCount(uint32_t bands);
     void SetBandLevel(uint32_t band, float level);
     void SetEnable(bool enable);
     void SetSamplingRate(uint32_t samplingRate);

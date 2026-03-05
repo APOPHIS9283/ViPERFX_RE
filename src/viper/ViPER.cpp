@@ -281,6 +281,10 @@ void ViPER::DispatchCommand(
             this->iirFilter.SetBandLevel((uint32_t) val1, (float) val2 / 100.0f);
             break;
         } // 0x10010
+        case PARAM_FIR_EQUALIZER_BAND_COUNT: {
+            this->iirFilter.SetBandCount((uint32_t) val1);
+            break;
+        }
         case PARAM_FIELD_SURROUND_ENABLE: {
             this->colorfulMusic.SetEnable(val1 != 0);
             break;
@@ -496,6 +500,10 @@ void ViPER::DispatchCommand(
         }
         case PARAM_SPKFX_FIR_EQUALIZER_BAND_LEVEL: {
             this->iirFilter.SetBandLevel((uint32_t) val1, (float) val2 / 100.0f);
+            break;
+        }
+        case PARAM_SPKFX_FIR_EQUALIZER_BAND_COUNT: {
+            this->iirFilter.SetBandCount((uint32_t) val1);
             break;
         }
         case PARAM_SPKFX_REVERBERATION_ENABLE: {
