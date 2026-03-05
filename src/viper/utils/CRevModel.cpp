@@ -106,8 +106,7 @@ float CRevModel::GetWidth() {
 }
 
 void CRevModel::Mute() {
-    if (GetMode() >= 0.5)
-        return;
+    if (GetMode() >= 0.5) return;
 
     for (int i = 0; i < 8; i++) {
         combL[i].Mute();
@@ -121,7 +120,7 @@ void CRevModel::Mute() {
 }
 
 void CRevModel::ProcessReplace(float *bufL, float *bufR, uint32_t size) {
-    for (uint32_t idx = 0; idx < size; idx++) {
+    for (uint32_t idx = 0; idx < size * 2; idx += 2) {
         float outL = 0.0;
         float outR = 0.0;
         float input = (bufL[idx] + bufR[idx]) * this->gain;
@@ -142,8 +141,7 @@ void CRevModel::ProcessReplace(float *bufL, float *bufR, uint32_t size) {
 }
 
 void CRevModel::Reset() {
-    if (GetMode() >= 0.5)
-        return;
+    if (GetMode() >= 0.5) return;
 
     for (int i = 0; i < 8; i++) {
         combL[i].Mute();
