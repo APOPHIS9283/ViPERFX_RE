@@ -19,7 +19,7 @@ for OFILE in ${CFGS}; do
         sed -i "s/^effects {/effects {\n  v4a_standard_re {\n    library v4a_re\n    uuid 90380da3-8536-4744-a6a3-5731970e640f\n  }/g" $FILE
         sed -i "s/^libraries {/libraries {\n  v4a_re {\n    path $LIBPATCH\/lib\/soundfx\/libv4a_re.so\n  }/g" $FILE
         ;;
-    *.xml) 
+    *.xml)
         sed -i "/v4a_standard_re/d" $FILE
         sed -i "/v4a_re/d" $FILE
         sed -i "/<libraries>/ a\        <library name=\"v4a_re\" path=\"libv4a_re.so\"\/>" $FILE
