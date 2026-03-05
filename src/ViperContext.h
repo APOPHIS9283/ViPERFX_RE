@@ -1,10 +1,11 @@
 #pragma once
 
-#include <vector>
-#include <cstddef>
 #include "essential.h"
 #include "viper/ViPER.h"
+#include <chrono>
+#include <cstddef>
 #include <string>
+#include <vector>
 
 class ViperContext {
 public:
@@ -19,7 +20,13 @@ public:
 
     ViperContext();
 
-    int32_t handleCommand(uint32_t cmdCode, uint32_t cmdSize, void *pCmdData, uint32_t *replySize, void *pReplyData);
+    int32_t handleCommand(
+        uint32_t cmdCode,
+        uint32_t cmdSize,
+        void *pCmdData,
+        uint32_t *replySize,
+        void *pReplyData
+    );
     int32_t process(audio_buffer_t *inBuffer, audio_buffer_t *outBuffer);
 
 private:
@@ -35,10 +42,17 @@ private:
     bool enabled;
     ViPER viper;
 
+    // Stream discontinuity detection
+    std::chrono::steady_clock::time_point lastProcessTime;
+    bool hasProcessed;
+    uint32_t fadeInRemaining;
+
     static void copyBufferConfig(buffer_config_t *dest, buffer_config_t *src);
     void handleSetConfig(effect_config_t *newConfig);
     int32_t handleSetParam(effect_param_t *pCmdParam, void *pReplyData);
-    int32_t handleGetParam(effect_param_t *pCmdParam, effect_param_t *pReplyParam, uint32_t *pReplySize);
+    int32_t handleGetParam(
+        effect_param_t *pCmdParam, effect_param_t *pReplyParam, uint32_t *pReplySize
+    );
 
     void setDisableReason(DisableReason reason);
     void setDisableReason(DisableReason reason, std::string message);
