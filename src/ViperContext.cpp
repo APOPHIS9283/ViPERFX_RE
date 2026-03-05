@@ -93,12 +93,6 @@ void ViperContext::handleSetConfig(effect_config_t *newConfig) {
         return;
     }
 
-    //    if (config.inputCfg.samplingRate > 48000) {
-    //        VIPER_LOGE("ViPER4Android disabled, reason [SR out of range]");
-    //        setDisableReason(DisableReason::INVALID_SAMPLING_RATE, "Sampling rate out of range: " + std::to_string(config.inputCfg.samplingRate));
-    //        return;
-    //    }
-
     if (config.inputCfg.channels != config.outputCfg.channels) {
         VIPER_LOGE(
             "ViPER4Android disabled, reason [in.CH = %d, out.CH = %d]",
@@ -163,7 +157,7 @@ void ViperContext::handleSetConfig(effect_config_t *newConfig) {
     bufferFrameCount = config.inputCfg.buffer.frameCount;
 
     // ViPER
-    viper.samplingRate = config.inputCfg.samplingRate;
+    viper.SetSamplingRate(config.inputCfg.samplingRate);
     viper.resetAllEffects();
 }
 
@@ -261,7 +255,7 @@ int32_t ViperContext::handleGetParam(
             auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
 
             uint64_t currentMs = now_ms.time_since_epoch().count();
-            uint64_t lastProcessTime = viper.processTimeMs;
+            uint64_t lastProcessTime = viper.GetProcessTimeMs();
 
             bool isProcessing;
             if (currentMs >= lastProcessTime) {
@@ -280,7 +274,7 @@ int32_t ViperContext::handleGetParam(
         case PARAM_GET_SAMPLING_RATE: {
             pReplyParam->status = 0;
             pReplyParam->vsize = sizeof(uint32_t);
-            *(uint32_t *) (pReplyParam->data + vOffset) = viper.samplingRate;
+            *(uint32_t *) (pReplyParam->data + vOffset) = viper.GetSamplingRate();
             *pReplySize = sizeof(effect_param_t) + pReplyParam->psize + vOffset
                           + pReplyParam->vsize;
             return 0;
@@ -288,7 +282,7 @@ int32_t ViperContext::handleGetParam(
         case PARAM_GET_CONVOLUTION_KERNEL_ID: {
             pReplyParam->status = 0;
             pReplyParam->vsize = sizeof(uint32_t);
-            *(uint32_t *) (pReplyParam->data + vOffset) = viper.convolver.GetKernelID();
+            *(uint32_t *) (pReplyParam->data + vOffset) = viper.GetConvolverKernelID();
             *pReplySize = sizeof(effect_param_t) + pReplyParam->psize + vOffset
                           + pReplyParam->vsize;
             return 0;

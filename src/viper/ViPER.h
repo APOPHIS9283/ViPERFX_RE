@@ -1,38 +1,50 @@
 #pragma once
 
-#include "utils/WaveBuffer.h"
-#include "effects/SpectrumExtend.h"
-#include "effects/Reverberation.h"
-#include "effects/DynamicSystem.h"
-#include "effects/ViPERClarity.h"
-#include "effects/SpeakerCorrection.h"
+#include "../ViPER4Android.h"
 #include "effects/AnalogX.h"
-#include "effects/TubeSimulator.h"
+#include "effects/ColorfulMusic.h"
+#include "effects/Convolver.h"
 #include "effects/Cure.h"
 #include "effects/DiffSurround.h"
-#include "effects/VHE.h"
-#include "utils/AdaptiveBuffer.h"
-#include "effects/Convolver.h"
-#include "effects/ViPERDDC.h"
-#include "effects/IIRFilter.h"
-#include "effects/ColorfulMusic.h"
+#include "effects/DynamicSystem.h"
 #include "effects/FETCompressor.h"
-#include "effects/ViPERBass.h"
-#include "effects/SoftwareLimiter.h"
+#include "effects/IIRFilter.h"
 #include "effects/PlaybackGain.h"
-#include "../ViPER4Android.h"
+#include "effects/Reverberation.h"
+#include "effects/SoftwareLimiter.h"
+#include "effects/SpeakerCorrection.h"
+#include "effects/SpectrumExtend.h"
+#include "effects/TubeSimulator.h"
+#include "effects/VHE.h"
+#include "effects/ViPERBass.h"
+#include "effects/ViPERClarity.h"
+#include "effects/ViPERDDC.h"
+#include "utils/AdaptiveBuffer.h"
+#include "utils/WaveBuffer.h"
 #include <array>
 
 class ViPER {
 public:
     ViPER();
 
-    void process(std::vector<float>& buffer, uint32_t size);
-    // TODO: Parameter types/names
-    void DispatchCommand(int param, int val1, int val2, int val3, int val4, uint32_t arrSize, signed char *arr);
+    void process(std::vector<float> &buffer, uint32_t size);
+    void DispatchCommand(
+        int param,
+        int val1,
+        int val2,
+        int val3,
+        int val4,
+        uint32_t arrSize,
+        signed char *arr
+    );
     void resetAllEffects();
 
-//private:
+    void SetSamplingRate(uint32_t rate) { samplingRate = rate; }
+    uint32_t GetSamplingRate() const { return samplingRate; }
+    uint64_t GetProcessTimeMs() const { return processTimeMs; }
+    uint32_t GetConvolverKernelID() { return convolver.GetKernelID(); }
+
+private:
     bool updateProcessTime;
     uint64_t processTimeMs;
     uint32_t samplingRate;
