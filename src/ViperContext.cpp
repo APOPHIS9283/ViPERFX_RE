@@ -371,6 +371,7 @@ int32_t ViperContext::handleCommand(
     uint32_t *pReplySize,
     void *pReplyData
 ) {
+    VIPER_LOGI("handleCommand: cmdCode=%d, cmdSize=%d, this=%p", cmdCode, cmdSize, this);
     uint32_t replySize = pReplySize == nullptr ? 0 : *pReplySize;
     switch (cmdCode) {
         case EFFECT_CMD_INIT: {
@@ -530,8 +531,9 @@ static const T &clamp(const T &v, const T &lo, const T &hi) {
     return std::min(std::max(v, lo), hi);
 }
 
-static void
-floatToFloat(float *dst, const float *src, size_t frameCount, bool accumulate) {
+static void floatToFloat(
+    float *dst, const float *src, size_t frameCount, bool accumulate
+) {
     if (accumulate) {
         for (size_t i = 0; i < frameCount * 2; i++) {
             dst[i] = clamp(dst[i] + src[i], -1.0f, 1.0f);

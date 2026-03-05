@@ -104,8 +104,6 @@ void ViPER::process(std::vector<float> &buffer, uint32_t size) {
     uint32_t tmpBufSize;
 
     if (this->convolver.GetEnabled() || this->vhe.GetEnabled()) {
-        //        VIPER_LOGD("Convolver or VHE is enable, use wave buffer");
-
         if (!this->waveBuffer.PushSamples(buffer.data(), size)) {
             this->waveBuffer.Reset();
             memset(buffer.data(), 0, size * 2 * sizeof(float));
@@ -131,8 +129,6 @@ void ViPER::process(std::vector<float> &buffer, uint32_t size) {
         tmpBuf = ptr;
         tmpBufSize = ret;
     } else {
-        //        VIPER_LOGD("Convolver and VHE are disabled, use adaptive buffer");
-
         if (this->adaptiveBuffer.PushFrames(buffer.data(), size)) {
             this->adaptiveBuffer.SetBufferOffset(size);
 
@@ -145,7 +141,6 @@ void ViPER::process(std::vector<float> &buffer, uint32_t size) {
         }
     }
 
-    //    VIPER_LOGD("Process buffer size: %d", tmpBufSize);
     if (tmpBufSize != 0) {
         this->viperDdc.Process(tmpBuf, size);
         this->spectrumExtend.Process(tmpBuf, size);
@@ -196,18 +191,9 @@ void ViPER::process(std::vector<float> &buffer, uint32_t size) {
 void ViPER::DispatchCommand(
     int param, int val1, int val2, int val3, int val4, uint32_t arrSize, signed char *arr
 ) {
-    VIPER_LOGD(
-        "Dispatch command: %d, %d, %d, %d, %d, %d, %p",
-        param,
-        val1,
-        val2,
-        val3,
-        val4,
-        arrSize,
-        arr
-    );
     switch (param) {
         case PARAM_SET_UPDATE_STATUS: {
+            VIPER_LOGI("Master: %s", val1 ? "ON" : "OFF");
             this->updateProcessTime = val1 != 0;
             break;
         }
@@ -216,6 +202,7 @@ void ViPER::DispatchCommand(
             break;
         }
         case PARAM_CONVOLUTION_ENABLE: {
+            VIPER_LOGI("Convolver: %s", val1 ? "ON" : "OFF");
             this->convolver.SetEnable(val1 != 0);
             break;
         } // 0x10002
@@ -245,6 +232,7 @@ void ViPER::DispatchCommand(
             break;
         } // 0x10007
         case PARAM_HEADPHONE_SURROUND_ENABLE: {
+            VIPER_LOGI("VHE: %s", val1 ? "ON" : "OFF");
             this->vhe.SetEnable(val1 != 0);
             break;
         } // 0x10008
@@ -253,6 +241,7 @@ void ViPER::DispatchCommand(
             break;
         } // 0x10009
         case PARAM_DDC_ENABLE: {
+            VIPER_LOGI("DDC: %s", val1 ? "ON" : "OFF");
             this->viperDdc.SetEnable(val1 != 0);
             break;
         } // 0x1000A
@@ -263,6 +252,7 @@ void ViPER::DispatchCommand(
             break;
         } // 0x1000B
         case PARAM_SPECTRUM_EXTENSION_ENABLE: {
+            VIPER_LOGI("SpectrumExtend: %s", val1 ? "ON" : "OFF");
             this->spectrumExtend.SetEnable(val1 != 0);
             break;
         } // 0x1000C
@@ -275,6 +265,7 @@ void ViPER::DispatchCommand(
             break;
         } // 0x1000E
         case PARAM_FIR_EQUALIZER_ENABLE: {
+            VIPER_LOGI("EQ: %s", val1 ? "ON" : "OFF");
             this->iirFilter.SetEnable(val1 != 0);
             break;
         } // 0x1000F
@@ -287,6 +278,7 @@ void ViPER::DispatchCommand(
             break;
         }
         case PARAM_FIELD_SURROUND_ENABLE: {
+            VIPER_LOGI("FieldSurround: %s", val1 ? "ON" : "OFF");
             this->colorfulMusic.SetEnable(val1 != 0);
             break;
         } // 0x10011
@@ -303,6 +295,7 @@ void ViPER::DispatchCommand(
             break;
         } // 0x10014
         case PARAM_DIFFERENTIAL_SURROUND_ENABLE: {
+            VIPER_LOGI("DiffSurround: %s", val1 ? "ON" : "OFF");
             this->diffSurround.SetEnable(val1 != 0);
             break;
         } // 0x10015
@@ -311,6 +304,7 @@ void ViPER::DispatchCommand(
             break;
         } // 0x10016
         case PARAM_REVERBERATION_ENABLE: {
+            VIPER_LOGI("Reverb: %s", val1 ? "ON" : "OFF");
             this->reverberation.SetEnable(val1 != 0);
             break;
         } // 0x10017
@@ -335,6 +329,7 @@ void ViPER::DispatchCommand(
             break;
         } // 0x1001C
         case PARAM_AUTOMATIC_GAIN_CONTROL_ENABLE: {
+            VIPER_LOGI("AGC: %s", val1 ? "ON" : "OFF");
             this->playbackGain.SetEnable(val1 != 0);
             break;
         } // 0x1001D
@@ -351,6 +346,7 @@ void ViPER::DispatchCommand(
             break;
         } // 0x10020
         case PARAM_DYNAMIC_SYSTEM_ENABLE: {
+            VIPER_LOGI("DynamicSystem: %s", val1 ? "ON" : "OFF");
             this->dynamicSystem.SetEnable(val1 != 0);
             break;
         } // 0x10021
@@ -371,6 +367,7 @@ void ViPER::DispatchCommand(
             break;
         } // 0x10025
         case PARAM_FIDELITY_BASS_ENABLE: {
+            VIPER_LOGI("Bass: %s", val1 ? "ON" : "OFF");
             this->viperBass.SetEnable(val1 != 0);
             break;
         } // 0x10026
@@ -387,6 +384,7 @@ void ViPER::DispatchCommand(
             break;
         } // 0x10029
         case PARAM_FIDELITY_CLARITY_ENABLE: {
+            VIPER_LOGI("Clarity: %s", val1 ? "ON" : "OFF");
             this->viperClarity.SetEnable(val1 != 0);
             break;
         } // 0x1002A
@@ -399,13 +397,13 @@ void ViPER::DispatchCommand(
             break;
         } // 0x1002C
         case PARAM_CURE_CROSS_FEED_ENABLED: {
+            VIPER_LOGI("Cure: %s", val1 ? "ON" : "OFF");
             this->cure.SetEnable(val1 != 0);
             break;
         } // 0x1002D
         case PARAM_CURE_CROSS_FEED_STRENGTH: {
             switch (val1) {
                 case 0: {
-                    // Cure_R::SetPreset(pCVar17,0x5f028a);
                     struct Crossfeed::Preset preset = {
                         .cutoff = 650,
                         .feedback = 95,
@@ -414,7 +412,6 @@ void ViPER::DispatchCommand(
                     break;
                 }
                 case 1: {
-                    // Cure_R::SetPreset(pCVar17,0x3c02bc);
                     struct Crossfeed::Preset preset = {
                         .cutoff = 700,
                         .feedback = 60,
@@ -423,7 +420,6 @@ void ViPER::DispatchCommand(
                     break;
                 }
                 case 2: {
-                    // Cure_R::SetPreset(pCVar17,0x2d02bc);
                     struct Crossfeed::Preset preset = {
                         .cutoff = 700,
                         .feedback = 45,
@@ -435,10 +431,12 @@ void ViPER::DispatchCommand(
             break;
         } // 0x1002E
         case PARAM_TUBE_SIMULATOR_ENABLED: {
+            VIPER_LOGI("TubeSimulator: %s", val1 ? "ON" : "OFF");
             this->tubeSimulator.SetEnable(val1 != 0);
             break;
         } // 0x1002F
         case PARAM_ANALOGX_ENABLE: {
+            VIPER_LOGI("AnalogX: %s", val1 ? "ON" : "OFF");
             this->analogX.SetEnable(val1 != 0);
             break;
         } // 0x10030
@@ -557,6 +555,7 @@ void ViPER::DispatchCommand(
             break;
         }
         case PARAM_FET_COMPRESSOR_ENABLE: {
+            VIPER_LOGI("FET: %s", val1 ? "ON" : "OFF");
             this->fetCompressor.SetParameter(
                 FETCompressor::ENABLE, (float) val1 / 100.0f
             );
@@ -741,6 +740,7 @@ void ViPER::DispatchCommand(
             break;
         }
         case PARAM_SPEAKER_CORRECTION_ENABLE: {
+            VIPER_LOGI("SpeakerCorrection: %s", val1 ? "ON" : "OFF");
             this->speakerCorrection.SetEnable(val1 != 0);
             break;
         }

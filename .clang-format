@@ -22,6 +22,9 @@ AlignOperands: Align
 
 BreakBeforeBinaryOperators: NonAssignment
 
+BreakAfterReturnType: None
+PenaltyReturnTypeOnItsOwnLine: 100000
+
 SortIncludes: CaseSensitive
 IncludeBlocks: Preserve
 
