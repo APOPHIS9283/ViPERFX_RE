@@ -25,7 +25,9 @@ void ViPERDDC::Process(float *samples, uint32_t size) {
             break;
         }
         default: {
-            VIPER_LOGD("ViPERDDC::Process() -> Invalid sampling rate: %d", this->samplingRate);
+            VIPER_LOGD(
+                "ViPERDDC::Process() -> Invalid sampling rate: %d", this->samplingRate
+            );
             return;
         }
     }
@@ -44,11 +46,7 @@ void ViPERDDC::Process(float *samples, uint32_t size) {
             float a2 = (*coeffs)[4];
 
             float outL =
-                    sampleL * b0 +
-                    x1L[j] * b1 +
-                    x2L[j] * b2 +
-                    y1L[j] * a1 +
-                    y2L[j] * a2;
+                sampleL * b0 + x1L[j] * b1 + x2L[j] * b2 + y1L[j] * a1 + y2L[j] * a2;
 
             x2L[j] = x1L[j];
             x1L[j] = sampleL;
@@ -58,11 +56,7 @@ void ViPERDDC::Process(float *samples, uint32_t size) {
             sampleL = outL;
 
             float outR =
-                    sampleR * b0 +
-                    x1R[j] * b1 +
-                    x2R[j] * b2 +
-                    y1R[j] * a1 +
-                    y2R[j] * a2;
+                sampleR * b0 + x1R[j] * b1 + x2R[j] * b2 + y1R[j] * a1 + y2R[j] * a2;
 
             x2R[j] = x1R[j];
             x1R[j] = sampleR;
@@ -99,9 +93,17 @@ void ViPERDDC::Reset() {
 
     memset(this->x1L.data(), 0, this->arrSize * sizeof(float));
     memset(this->x1R.data(), 0, this->arrSize * sizeof(float));
+    memset(this->x2L.data(), 0, this->arrSize * sizeof(float));
+    memset(this->x2R.data(), 0, this->arrSize * sizeof(float));
+    memset(this->y1L.data(), 0, this->arrSize * sizeof(float));
+    memset(this->y1R.data(), 0, this->arrSize * sizeof(float));
+    memset(this->y2L.data(), 0, this->arrSize * sizeof(float));
+    memset(this->y2R.data(), 0, this->arrSize * sizeof(float));
 }
 
-void ViPERDDC::SetCoeffs(uint32_t newCoeffsSize, float *newCoeffs44100, float *newCoeffs48000) {
+void ViPERDDC::SetCoeffs(
+    uint32_t newCoeffsSize, float *newCoeffs44100, float *newCoeffs48000
+) {
     ReleaseResources();
 
     if (newCoeffsSize == 0) return;
