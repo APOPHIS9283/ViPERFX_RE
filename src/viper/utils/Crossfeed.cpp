@@ -1,7 +1,7 @@
-#include <cstring>
-#include <cmath>
 #include "Crossfeed.h"
 #include "../constants.h"
+#include <cmath>
+#include <cstring>
 
 // Basically Bauer-to-Stereophonic Binaural filter
 // See: http://bs2b.sourceforge.net/
@@ -20,7 +20,8 @@ Crossfeed::Crossfeed() {
 }
 
 #define lo_filter(in, out_1) (this->a0_lo * (in) + this->b1_lo * (out_1))
-#define hi_filter(in, in_1, out_1) (this->a0_hi * (in) + this->a1_hi * (in_1) + this->b1_hi * (out_1))
+#define hi_filter(in, in_1, out_1)                                                       \
+    (this->a0_hi * (in) + this->a1_hi * (in_1) + this->b1_hi * (out_1))
 
 void Crossfeed::FilterSample(float *sample) {
     this->lfs.lo[0] = lo_filter(sample[0], this->lfs.lo[0]);
@@ -44,7 +45,7 @@ float Crossfeed::GetFeedback() {
 }
 
 float Crossfeed::GetLevelDelay() {
-    if (this->preset.cutoff <= 1800) { // TODO: Previous version reports <= 2000
+    if (this->preset.cutoff <= 1800) {
         return (float) ((18700.0 / (double) this->preset.cutoff) * 10.0);
     } else {
         return 0.0;

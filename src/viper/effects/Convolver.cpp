@@ -77,13 +77,10 @@ static uint32_t calculate_crc32(const uint8_t *data, uint32_t length) {
         0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D
     };
 
-    uint32_t crc = 0xffffffff; // Initialize CRC32 to all 1s
+    uint32_t crc = 0xffffffff;
 
-    // Loop through each byte in the input data
     for (uint32_t i = 0; i < length; ++i) {
-        uint8_t byte = data[i];
-        // Use the lookup table to update the CRC32 value
-        crc = crc_table[(crc ^ byte) & 0xff] ^ (crc >> 8);
+        crc = crc_table[(crc ^ data[i]) & 0xff] ^ (crc >> 8);
     }
 
     // Return the bitwise complement of the final CRC32 value

@@ -1,4 +1,5 @@
 #include "ViPER.h"
+#include "../log.h"
 #include "constants.h"
 #include <chrono>
 #include <cstring>

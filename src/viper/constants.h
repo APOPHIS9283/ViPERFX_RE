@@ -6,8 +6,6 @@
 #include <cerrno>
 #endif
 
-#include "../log.h" // TODO: Remove this dependency
-
 #if defined(__arm__)
 #define VIPER_ARCHITECTURE "ARM"
 #elif defined(__aarch64__)
