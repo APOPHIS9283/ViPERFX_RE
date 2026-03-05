@@ -22,5 +22,5 @@
 #endif
 
 #define VIPER_NAME "ViPER4Android"
-#define VIPER_AUTHORS "viper.WYF, Martmists, Iscle"
+#define VIPER_AUTHORS "viper.WYF, Martmists, Iscle, llsl"
 #define VIPER_DEFAULT_SAMPLING_RATE 44100

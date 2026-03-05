@@ -2,22 +2,18 @@
 
 This is a reverse-engineering project aimed to make ViPER4Android more easy to access, modify, and improve.
 Some QOL changes have been made, such as processing audio as float32, removing unused code, using more modern libraries, etc.
-To view the progress, see [Issue #2](https://github.com/AndroidAudioMods/ViPERFX_RE/issues/2)
+
+The new ViPER4Android APP source code will be release soon, I need some time to clean my codebase, which has a lot debug parts to test the decompiled effects from the original `libv4a_fx.so`.
+
+I am also working on bringing the ViPER DSP to MacOS and Windows, please stay tuned.
 
 # Building
 
 - Install the NDK, CMake and Make.
-- Run `cmake . -DCMAKE_TOOLCHAIN_FILE=<NDKROOT>/build/cmake/android.toolchain.cmake -DANDROID_ABI=<ABI>` where <NDKROOT> is where you installed the NDK and <ABI> is the target ABI to build for.
-- Run `make`
-- You should now find a `libv4afx_r.so` file in your project root.
-
-# CLion
-
-Make sure to install `ninja`
-In CLion, make sure to set the following custom arguments: `-DCMAKE_TOOLCHAIN_FILE=<NDKROOT>/build/cmake/android.toolchain.cmake -DANDROID_ABI=<ABI> -G Ninja`
-Then you can build the project with `ninja` instead of `make`
+- Run `make libs` to build .so files.
+- Run `make zip` to generate Magisk module.
 
 # Credits
 
 Zhuhang and ViPER520 for making ViPER4Android
-Martmists and Iscle for reverse-engineering
+Martmists, Iscle, llsl for reverse-engineering

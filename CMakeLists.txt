@@ -8,8 +8,8 @@ set(CMAKE_CXX_COMPILER_VERSION 20)
 #add_compile_definitions(ANDROID_PLATFORM=android-24)
 
 project("ViPER4Android")
-add_compile_definitions(VERSION_CODE=20231210)
-add_compile_definitions(VERSION_NAME="0.6.1")
+add_compile_definitions(VERSION_CODE=20260305)
+add_compile_definitions(VERSION_NAME="1.0.0")
 
 # ViPERFX
 include_directories(src/include)
