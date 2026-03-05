@@ -28,6 +28,8 @@ float SoftwareLimiter::Process(float sample) {
     float fVar10;
     float abs_sample;
 
+    if (!std::isfinite(sample)) sample = 0.0f;
+
     abs_sample = std::abs(sample);
     if (abs_sample < this->gate) {
         if (this->ready) goto LAB_0006d86c;
@@ -103,6 +105,7 @@ void SoftwareLimiter::Reset() {
     this->writeIndex = 0;
     this->gainEnvelope = 1.0;
     this->smoothedGain = 1.0;
+    this->targetGain = 1.0;
 }
 
 void SoftwareLimiter::SetGate(float gate) {

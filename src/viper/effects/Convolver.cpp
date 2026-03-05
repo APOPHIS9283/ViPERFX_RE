@@ -1,6 +1,6 @@
 #include "Convolver.h"
 #include "../constants.h"
-#include "../utils/WavReader.h"
+#include "../utils/WaveReader.h"
 #include <cstddef>
 #include <cstring>
 
@@ -82,8 +82,6 @@ static uint32_t calculate_crc32(const uint8_t *data, uint32_t length) {
     for (uint32_t i = 0; i < length; ++i) {
         crc = crc_table[(crc ^ data[i]) & 0xff] ^ (crc >> 8);
     }
-
-    // Return the bitwise complement of the final CRC32 value
     return ~crc;
 }
 
