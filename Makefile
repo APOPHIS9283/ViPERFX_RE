@@ -1,0 +1,97 @@
+# ViPERFX_RE
+# Builds libv4a_re.so for Android via NDK/CMake and packages Magisk module
+
+# NDK: ANDROID_NDK_HOME > ANDROID_NDK_ROOT > ANDROID_HOME/ndk/<latest>
+ANDROID_NDK_HOME ?= $(or $(ANDROID_NDK_ROOT),$(wildcard $(ANDROID_HOME)/ndk/$(shell ls $(ANDROID_HOME)/ndk 2>/dev/null | sort -V | tail -1)))
+ifeq ($(ANDROID_NDK_HOME),)
+  $(warning ANDROID_NDK_HOME not set. Set it to your NDK installation path.)
+endif
+
+NDK_TOOLCHAIN := $(ANDROID_NDK_HOME)/build/cmake/android.toolchain.cmake
+MIN_SDK        := 21
+ABIS           := armeabi-v7a arm64-v8a
+BUILD_TYPE     := Release
+
+BUILD_DIR      := build
+OUT_DIR        := out
+MODULE_DIR     := module
+MODULE_OUT     := $(OUT_DIR)/magisk_module
+VERSION        := $(shell grep 'version=' $(MODULE_DIR)/module.prop | head -1 | cut -d= -f2)
+MODULE_ZIP     := $(OUT_DIR)/ViPER4Android-RE-$(VERSION).zip
+
+ADB_DEVICE     := $(shell adb devices 2>/dev/null | awk 'NR==2 && $$2=="device"{print $$1}')
+ADB            := adb$(if $(ADB_DEVICE), -s $(ADB_DEVICE),)
+
+.PHONY: all clean libs module zip deploy $(ABIS)
+
+all: libs
+
+# Build all ABIs
+libs: $(ABIS)
+
+# Per-ABI build targets
+$(ABIS):
+	@echo "Building for ABI: $@"
+	@mkdir -p $(BUILD_DIR)/$@
+	cmake -B $(BUILD_DIR)/$@ \
+		-DCMAKE_TOOLCHAIN_FILE=$(NDK_TOOLCHAIN) \
+		-DANDROID_ABI=$@ \
+		-DANDROID_PLATFORM=android-$(MIN_SDK) \
+		-DANDROID_ARM_NEON=TRUE \
+		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) \
+		.
+	cmake --build $(BUILD_DIR)/$@ -- -j$$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
+	@mkdir -p $(OUT_DIR)
+	cp $(BUILD_DIR)/$@/libv4a_re.so $(OUT_DIR)/libv4a_re_$@.so
+
+# Prepare Magisk module directory structure
+module: libs
+	@echo "Preparing Magisk module..."
+	@rm -rf $(MODULE_OUT)
+	@mkdir -p $(MODULE_OUT)/common/files
+	@cp -r $(MODULE_DIR)/META-INF $(MODULE_OUT)/
+	@cp $(MODULE_DIR)/module.prop $(MODULE_OUT)/
+	@cp $(MODULE_DIR)/customize.sh $(MODULE_OUT)/
+	@cp $(MODULE_DIR)/post-fs-data.sh $(MODULE_OUT)/
+	@cp $(MODULE_DIR)/uninstall.sh $(MODULE_OUT)/
+	@cp $(MODULE_DIR)/changelog.md $(MODULE_OUT)/
+	@cp $(MODULE_DIR)/LICENSE $(MODULE_OUT)/
+	@cp -r $(MODULE_DIR)/common/* $(MODULE_OUT)/common/
+	@for abi in $(ABIS); do \
+		cp $(OUT_DIR)/libv4a_re_$$abi.so $(MODULE_OUT)/common/files/; \
+	done
+
+# Create flashable zip
+zip: module
+	@echo "Creating Magisk module zip..."
+	@mkdir -p $(OUT_DIR)
+	@rm -f $(MODULE_ZIP)
+	@cd $(MODULE_OUT) && zip -r ../../$(MODULE_ZIP) .
+	@echo "Module: $(MODULE_ZIP)"
+
+# Build single ABI
+arm64: arm64-v8a
+arm32: armeabi-v7a
+
+clean:
+	rm -rf $(BUILD_DIR) $(OUT_DIR)
+
+help:
+	@echo "ViPERFX_RE Build System"
+	@echo ""
+	@echo "Prerequisites:"
+	@echo "  - Android NDK (set ANDROID_NDK_HOME)"
+	@echo "  - CMake"
+	@echo ""
+	@echo "Targets:"
+	@echo "  make libs          Build libv4a_re.so for all ABIs (default)"
+	@echo "  make arm64-v8a     Build for arm64 only"
+	@echo "  make armeabi-v7a   Build for arm32 only"
+	@echo "  make module        Prepare Magisk module directory"
+	@echo "  make zip           Build + package Magisk flashable zip"
+	@echo "  make clean         Remove build artifacts"
+	@echo ""
+	@echo "Options:"
+	@echo "  ANDROID_NDK_HOME=<path>  NDK installation path"
+	@echo "  MIN_SDK=<num>            Minimum SDK version (default: 21)"
+	@echo "  BUILD_TYPE=<type>        CMake build type (default: Release)"
