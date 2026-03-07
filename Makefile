@@ -9,7 +9,7 @@ endif
 
 NDK_TOOLCHAIN := $(ANDROID_NDK_HOME)/build/cmake/android.toolchain.cmake
 MIN_SDK        := 21
-ABIS           := armeabi-v7a arm64-v8a
+ALL_ABIS           := armeabi-v7a arm64-v8a
 BUILD_TYPE     := Release
 
 # Version defaults from module.prop (overridable via CLI)
@@ -67,7 +67,6 @@ module: libs
 	@cp $(MODULE_DIR)/customize.sh $(MODULE_OUT)/
 	@cp $(MODULE_DIR)/post-fs-data.sh $(MODULE_OUT)/
 	@cp $(MODULE_DIR)/uninstall.sh $(MODULE_OUT)/
-	@cp $(MODULE_DIR)/changelog.md $(MODULE_OUT)/
 	@cp $(MODULE_DIR)/LICENSE $(MODULE_OUT)/
 	@cp -r $(MODULE_DIR)/common/* $(MODULE_OUT)/common/
 	@sed -i.bak \
