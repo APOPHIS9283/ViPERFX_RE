@@ -9,24 +9,35 @@ endif
 
 NDK_TOOLCHAIN := $(ANDROID_NDK_HOME)/build/cmake/android.toolchain.cmake
 MIN_SDK        := 21
-ABIS           := armeabi-v7a arm64-v8a
+ALL_ABIS           := armeabi-v7a arm64-v8a
 BUILD_TYPE     := Release
+
+# Version defaults from module.prop (overridable via CLI)
+VERSION_NAME   ?= $(shell grep '^version=' module/module.prop | cut -d= -f2)
+VERSION_CODE   ?= $(shell grep '^versionCode=' module/module.prop | cut -d= -f2)
+
+# ABI selection: pass ABI= to build a subset (comma or space separated)
+COMMA := ,
+ifdef ABI
+  ABIS := $(subst $(COMMA), ,$(ABI))
+else
+  ABIS := $(ALL_ABIS)
+endif
 
 BUILD_DIR      := build
 OUT_DIR        := out
 MODULE_DIR     := module
 MODULE_OUT     := $(OUT_DIR)/magisk_module
-VERSION        := $(shell grep 'version=' $(MODULE_DIR)/module.prop | head -1 | cut -d= -f2)
-MODULE_ZIP     := $(OUT_DIR)/ViPER4Android-RE-$(VERSION).zip
+MODULE_ZIP     := $(OUT_DIR)/ViPER4Android-RE-$(VERSION_NAME).zip
 
 ADB_DEVICE     := $(shell adb devices 2>/dev/null | awk 'NR==2 && $$2=="device"{print $$1}')
 ADB            := adb$(if $(ADB_DEVICE), -s $(ADB_DEVICE),)
 
-.PHONY: all clean libs module zip deploy $(ABIS)
+.PHONY: all clean libs module zip deploy $(ALL_ABIS)
 
 all: libs
 
-# Build all ABIs
+# Build selected ABIs
 libs: $(ABIS)
 
 # Per-ABI build targets
@@ -39,6 +50,8 @@ $(ABIS):
 		-DANDROID_PLATFORM=android-$(MIN_SDK) \
 		-DANDROID_ARM_NEON=TRUE \
 		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) \
+		-DVERSION_CODE=$(VERSION_CODE) \
+		-DVERSION_NAME=$(VERSION_NAME) \
 		.
 	cmake --build $(BUILD_DIR)/$@ -- -j$$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
 	@mkdir -p $(OUT_DIR)
@@ -54,9 +67,12 @@ module: libs
 	@cp $(MODULE_DIR)/customize.sh $(MODULE_OUT)/
 	@cp $(MODULE_DIR)/post-fs-data.sh $(MODULE_OUT)/
 	@cp $(MODULE_DIR)/uninstall.sh $(MODULE_OUT)/
-	@cp $(MODULE_DIR)/changelog.md $(MODULE_OUT)/
 	@cp $(MODULE_DIR)/LICENSE $(MODULE_OUT)/
 	@cp -r $(MODULE_DIR)/common/* $(MODULE_OUT)/common/
+	@sed -i.bak \
+		-e 's/^version=.*/version=$(VERSION_NAME)/' \
+		-e 's/^versionCode=.*/versionCode=$(VERSION_CODE)/' \
+		$(MODULE_OUT)/module.prop && rm -f $(MODULE_OUT)/module.prop.bak
 	@for abi in $(ABIS); do \
 		cp $(OUT_DIR)/libv4a_re_$$abi.so $(MODULE_OUT)/common/files/; \
 	done
@@ -95,3 +111,6 @@ help:
 	@echo "  ANDROID_NDK_HOME=<path>  NDK installation path"
 	@echo "  MIN_SDK=<num>            Minimum SDK version (default: 21)"
 	@echo "  BUILD_TYPE=<type>        CMake build type (default: Release)"
+	@echo "  VERSION_NAME=<str>       Version name (default: from module.prop)"
+	@echo "  VERSION_CODE=<num>       Version code (default: from module.prop)"
+	@echo "  ABI=<abi[,abi]>          Build specific ABI(s) (default: all)"
