@@ -9,7 +9,7 @@ endif
 
 NDK_TOOLCHAIN := $(ANDROID_NDK_HOME)/build/cmake/android.toolchain.cmake
 MIN_SDK        := 21
-ALL_ABIS           := armeabi-v7a arm64-v8a
+ALL_ABIS       := armeabi-v7a arm64-v8a
 BUILD_TYPE     := Release
 
 # Version defaults from module.prop (overridable via CLI)
@@ -91,6 +91,10 @@ arm32: armeabi-v7a
 
 clean:
 	rm -rf $(BUILD_DIR) $(OUT_DIR)
+
+format:
+	@echo "Formatting code with clang-format..."
+	@find src/ -name '*.[ch]' -o -name '*.cpp' | xargs clang-format -i
 
 help:
 	@echo "ViPERFX_RE Build System"
