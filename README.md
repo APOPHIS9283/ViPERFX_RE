@@ -18,6 +18,7 @@ I am also working on bringing the ViPER DSP to MacOS and Windows, please stay tu
 
 - Download the latest release from the [releases page](https://github.com/likelikeslike/ViPERFX_RE/releases).
 - Install the Magisk module zip and the ViPER4Android app.
+- [Experiential] For devices use AIDL, please use `ViPER4Android-RE-AIDL`, this is tested on Pixel 8 Pro running Android 16, it may not work on non-Pixel devices.
 - Reboot your device and enjoy the new ViPER4Android.
 
 ## Building
