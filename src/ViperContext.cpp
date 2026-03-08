@@ -8,6 +8,15 @@
 
 #define SET(type, ptr, value) (*(type *) (ptr) = (value))
 
+#define PARAM_GET_ENABLED 1
+#define PARAM_GET_CONFIGURE 2
+#define PARAM_GET_STREAMING 3
+#define PARAM_GET_SAMPLING_RATE 4
+#define PARAM_GET_CONVOLUTION_KERNEL_ID 5
+#define PARAM_GET_DRIVER_VERSION_CODE 6
+#define PARAM_GET_DRIVER_VERSION_NAME 7
+#define PARAM_GET_ARCHITECTURE 8
+
 ViperContext::ViperContext() :
     config({}),
     disableReason(DisableReason::NONE),
@@ -299,52 +308,6 @@ int32_t ViperContext::handleGetParam(
             pReplyParam->status = 0;
             pReplyParam->vsize = strlen(VERSION_NAME);
             memcpy(pReplyParam->data + vOffset, VERSION_NAME, pReplyParam->vsize);
-            *pReplySize = sizeof(effect_param_t) + pReplyParam->psize + vOffset
-                          + pReplyParam->vsize;
-            return 0;
-        }
-        case PARAM_GET_DISABLE_REASON: {
-            pReplyParam->status = 0;
-            pReplyParam->vsize = sizeof(int32_t);
-            *(int32_t *) (pReplyParam->data + vOffset) =
-                static_cast<int32_t>(disableReason);
-            *pReplySize = sizeof(effect_param_t) + pReplyParam->psize + vOffset
-                          + pReplyParam->vsize;
-            return 0;
-        }
-        case PARAM_GET_DISABLE_REASON_MESSAGE: {
-            pReplyParam->status = 0;
-            pReplyParam->vsize = disableReasonMessage.size();
-            memcpy(
-                pReplyParam->data + vOffset,
-                disableReasonMessage.c_str(),
-                pReplyParam->vsize
-            );
-            *pReplySize = sizeof(effect_param_t) + pReplyParam->psize + vOffset
-                          + pReplyParam->vsize;
-            return 0;
-        }
-        case PARAM_GET_CONFIG: {
-            pReplyParam->status = 0;
-            pReplyParam->vsize = 40;
-            // Input
-            SET(uint64_t, pReplyParam->data + vOffset, config.inputCfg.buffer.frameCount);
-            SET(uint32_t, pReplyParam->data + vOffset + 8, config.inputCfg.samplingRate);
-            SET(uint32_t, pReplyParam->data + vOffset + 12, config.inputCfg.channels);
-            SET(uint8_t, pReplyParam->data + vOffset + 16, config.inputCfg.format);
-            SET(uint8_t, pReplyParam->data + vOffset + 17, config.inputCfg.accessMode);
-            SET(uint16_t, pReplyParam->data + vOffset + 18, config.inputCfg.mask);
-            // Output
-            SET(uint64_t,
-                pReplyParam->data + vOffset + 20,
-                config.outputCfg.buffer.frameCount);
-            SET(uint32_t,
-                pReplyParam->data + vOffset + 28,
-                config.outputCfg.samplingRate);
-            SET(uint32_t, pReplyParam->data + vOffset + 32, config.outputCfg.channels);
-            SET(uint8_t, pReplyParam->data + vOffset + 36, config.outputCfg.format);
-            SET(uint8_t, pReplyParam->data + vOffset + 37, config.outputCfg.accessMode);
-            SET(uint16_t, pReplyParam->data + vOffset + 38, config.outputCfg.mask);
             *pReplySize = sizeof(effect_param_t) + pReplyParam->psize + vOffset
                           + pReplyParam->vsize;
             return 0;
