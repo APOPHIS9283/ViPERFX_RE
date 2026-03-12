@@ -548,6 +548,16 @@ int32_t ViperContext::process(audio_buffer_t *inBuffer, audio_buffer_t *outBuffe
         return -EINVAL;
     }
 
+#if defined(__aarch64__)
+    uint64_t origFpcr;
+    asm volatile("mrs %0, fpcr" : "=r"(origFpcr));
+    asm volatile("msr fpcr, %0" ::"r"(origFpcr | (1 << 24)));
+#elif defined(__arm__)
+    uint32_t origFpscr;
+    asm volatile("vmrs %0, fpscr" : "=r"(origFpscr));
+    asm volatile("vmsr fpscr, %0" ::"r"(origFpscr | (1 << 24)));
+#endif
+
     auto now = std::chrono::steady_clock::now();
     if (hasProcessed) {
         auto elapsed =
@@ -581,6 +591,11 @@ int32_t ViperContext::process(audio_buffer_t *inBuffer, audio_buffer_t *outBuffe
             floatToFloat(buffer.data(), inBuffer->f32, frameCount, false);
             break;
         default:
+#if defined(__aarch64__)
+            asm volatile("msr fpcr, %0" ::"r"(origFpcr));
+#elif defined(__arm__)
+            asm volatile("vmsr fpscr, %0" ::"r"(origFpscr));
+#endif
             return -EINVAL;
     }
 
@@ -614,8 +629,19 @@ int32_t ViperContext::process(audio_buffer_t *inBuffer, audio_buffer_t *outBuffe
             floatToFloat(outBuffer->f32, buffer.data(), frameCount, accumulate);
             break;
         default:
+#if defined(__aarch64__)
+            asm volatile("msr fpcr, %0" ::"r"(origFpcr));
+#elif defined(__arm__)
+            asm volatile("vmsr fpscr, %0" ::"r"(origFpscr));
+#endif
             return -EINVAL;
     }
+
+#if defined(__aarch64__)
+    asm volatile("msr fpcr, %0" ::"r"(origFpcr));
+#elif defined(__arm__)
+    asm volatile("vmsr fpscr, %0" ::"r"(origFpscr));
+#endif
 
     return 0;
 }
