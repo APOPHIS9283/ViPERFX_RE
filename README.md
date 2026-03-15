@@ -3,8 +3,6 @@
 This is a reverse-engineering project aimed to make ViPER4Android more easy to access, modify, and improve.
 Some QOL changes have been made, such as processing audio as float32, removing unused code, using more modern libraries, etc.
 
-The new ViPER4Android App source code will be release soon, I need some time to clean my codebase, which has a lot debug parts to test the decompiled effects from the original `libv4a_fx.so`.
-
 I am also working on bringing the ViPER DSP to MacOS and Windows, please stay tuned.
 
 ## Important Notes
@@ -23,8 +21,11 @@ I am also working on bringing the ViPER DSP to MacOS and Windows, please stay tu
 
 ## AIDL Driver Troubleshooting
 
+> [!NOTE]
+> The AIDL module needs to mount the driver files and `audio_effects*.xml` files, and it is only tested with `MagiskSu`. If you are using other root solutions, such as `KernelSU`, make sure you have enable the corresponding options to allow mounting files in `/vendor` and `/system`.
+
 > [!IMPORTANT]
-> If you encounter issue with the installation or usage of the AIDL driver, you can diagnose the problem with the following commands. Make sure to capture the logs while reproducing the issue, and provide the logs if you want to ask for help in the issue.
+> If you encounter issue with the installation or usage of the AIDL driver, you can diagnose the problem with the following commands. Make sure to capture the logs while reproducing the issue, and provide the logs if you want to ask for help in the issue tracker.
 
 ### Log Tags
 
