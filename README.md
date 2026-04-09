@@ -3,21 +3,25 @@
 This is a reverse-engineering project aimed to make ViPER4Android more easy to access, modify, and improve.
 Some QOL changes have been made, such as processing audio as float32, removing unused code, using more modern libraries, etc.
 
-I am also working on bringing the ViPER DSP to MacOS and Windows, please stay tuned.
+If you want to experience the ViPER on MacOS and Windows, please check out my projects:
+
+- [ViPER4Windows](https://github.com/likelikeslike/ViPER4Windows)
+- [ViPER4Mac](https://github.com/likelikeslike/ViPER4Mac)
 
 ## Important Notes
 
-- The non-AIDL module is tested on Pixel 8 Pro running Android 14, it is not guaranteed to work on other devices or Android versions, and it may cause issues such as bootloops, crashes, or audio problems, so please make sure you have a backup and know how to uninstall the module if something goes wrong.
-- The non-AIDL module does not work on some Android 15+ devices that use AIDL as the audio effect interface, see this [issue](https://github.com/AndroidAudioMods/ViPER4Android/issues/101#issuecomment-2358421687).
-- The AIDL module is tested on Pixel 8 Pro running Android 16, it may not work on non-Pixel devices, some devices may need ShadoV's `PIXAML` module to work. And it is highly experimental.
-- The effect algorithms are decompiled from the original `libv4a_fx.so` and may not be 100% accurate, and it is based on personal research and testing, so if you feel the sound is different from the original ViPER4Android, you may take a look at the source code in this repository and compare it with the original one, and contributions are welcome.
-- This is reverse-engineering work, it cannot be used for any commercial purposes, and it may be illegal in some regions, so please make sure you understand the risks before using or modifying this project.
+### **Disclaimers & Compatibility**
+
+* **Non-AIDL Module:** This module is confirmed to work on a Pixel 8 Pro with Android 14. Compatibility with other devices or Android versions is not guaranteed and may lead to system instability, including bootloops or crashes. It is incompatible with Android 15+ devices that have transitioned to the AIDL audio interface.
+* **AIDL Module:** This experimental module is tested on a Pixel 8 Pro with Android 16. Other devices may require additional modules like ShadoV's `PIXAML` to function.
+* **Audio Algorithms:** The audio processing algorithms are based on a decompilation of the original `libv4a_fx.so`. Due to the nature of reverse-engineering, they may not be perfectly accurate. If you notice any audio discrepancies compared to the original ViPER4Android, it is encouraged to inspect the source code and consider contributing. PRs are welcome.
+* **Legal & Usage:** This is a reverse-engineering project. It is not intended for commercial use and may be subject to legal restrictions in your area. Please understand the risks before using or modifying this software.
 
 ## Installation
 
-- Download the latest module from the [releases page](https://github.com/likelikeslike/ViPERFX_RE/releases) and the ViPER4Android app from this [repo](https://github.com/likelikeslike/ViPER4Android)
-- Install the Magisk module (make sure you install the correct version for your device) and the ViPER4Android app.
-- Reboot your device and enjoy the new ViPER4Android.
+* Download the latest module from the [Releases page](https://github.com/likelikeslike/ViPERFX_RE/releases) and the ViPER4Android app from this [repo](https://github.com/likelikeslike/ViPER4Android)
+* Install the Magisk module (make sure you install the correct version for your device) and the ViPER4Android app.
+* Reboot your device and enjoy the new ViPER4Android.
 
 ## AIDL Driver Troubleshooting
 
@@ -159,9 +163,9 @@ adb logcat --pid=$(adb shell pidof android.hardware.audio.service-aidl.aoc | tr 
 
 ## Building
 
-- Install the NDK, CMake and Make.
-- Run `make libs` to build .so files.
-- Run `make zip` to generate Magisk module.
+* Install the NDK, CMake and Make.
+* Run `make libs` to build .so files.
+* Run `make zip` to generate Magisk module.
 
 ## Credits
 
