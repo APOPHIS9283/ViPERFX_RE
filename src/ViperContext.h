@@ -41,6 +41,7 @@ private:
     // Viper
     bool enabled;
     ViPER viper;
+    uint64_t lastStreamingFrames = 0;
 
     // Stream discontinuity detection
     std::chrono::steady_clock::time_point lastProcessTime;

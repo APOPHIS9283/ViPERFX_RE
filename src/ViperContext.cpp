@@ -3,7 +3,6 @@
 #include "viper/constants.h"
 #include <cerrno>
 #include <chrono>
-#include <cmath>
 #include <cstring>
 
 #define SET(type, ptr, value) (*(type *) (ptr) = (value))
@@ -259,19 +258,10 @@ int32_t ViperContext::handleGetParam(
                           + pReplyParam->vsize;
             return 0;
         }
-        case PARAM_GET_STREAMING: { // Is processing
-            auto now = std::chrono::system_clock::now();
-            auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
-
-            uint64_t currentMs = now_ms.time_since_epoch().count();
-            uint64_t lastProcessTime = viper.GetProcessTimeMs();
-
-            bool isProcessing;
-            if (currentMs >= lastProcessTime) {
-                isProcessing = currentMs - lastProcessTime < 5000;
-            } else {
-                isProcessing = false;
-            }
+        case PARAM_GET_STREAMING: {
+            uint64_t frames = viper.GetProcessedFrames();
+            int32_t isProcessing = (frames != lastStreamingFrames && frames > 0) ? 1 : 0;
+            lastStreamingFrames = frames;
 
             pReplyParam->status = 0;
             pReplyParam->vsize = sizeof(int32_t);
