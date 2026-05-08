@@ -13,8 +13,8 @@ ALL_ABIS       := armeabi-v7a arm64-v8a
 BUILD_TYPE     := Release
 
 # Version defaults from module.prop (overridable via CLI)
-VERSION_NAME   ?= v1.2.2
-VERSION_CODE   ?= 20260411
+VERSION_NAME   ?= v1.3.0
+VERSION_CODE   ?= 20260508
 
 # ABI selection: pass ABI= to build a subset (comma or space separated)
 COMMA := ,
