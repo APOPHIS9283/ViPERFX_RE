@@ -1,35 +1,56 @@
 # ViPERFX_RE
 
-This is a reverse-engineering project aimed to make ViPER4Android more easy to access, modify, and improve.
-Some QOL changes have been made, such as processing audio as float32, removing unused code, using more modern libraries, etc.
+A reverse-engineered, modernized port of ViPER4Android. The DSP has been re-implemented from a decompilation of the original `libv4a_fx.so`, with audio processed in float32, dead code removed, and dependencies refreshed.
 
-If you want to experience the ViPER on MacOS and Windows, please check out my projects:
+If you want ViPER on desktop instead of Android, see:
 
 - [ViPER4Windows](https://github.com/likelikeslike/ViPER4Windows)
 - [ViPER4Mac](https://github.com/likelikeslike/ViPER4Mac)
 
-## Important Notes
+## Module Architecture
 
-### **Disclaimers & Compatibility**
+ViPERFX_RE ships as **two separate Magisk modules**, both built around the same DSP engine (`ViPERDSP`) but integrated through different Android audio HAL interfaces. They are not interchangeable: each module is designed for a specific generation of Android’s audio framework. Installing the wrong one may either do nothing or cause boot issues.
 
-* **Non-AIDL Module:** This module is confirmed to work on a Pixel 8 Pro with Android 14. Compatibility with other devices or Android versions is not guaranteed and may lead to system instability, including bootloops or crashes. It is incompatible with Android 15+ devices that have transitioned to the AIDL audio interface.
-* **AIDL Module:** This experimental module is tested on a Pixel 8 Pro with Android 16. Other devices may require additional modules like ShadoV's `PIXAML` to function.
-* **Audio Algorithms:** The audio processing algorithms are based on a decompilation of the original `libv4a_fx.so`. Due to the nature of reverse-engineering, they may not be perfectly accurate. If you notice any audio discrepancies compared to the original ViPER4Android, it is encouraged to inspect the source code and consider contributing. PRs are welcome.
-* **Legal & Usage:** This is a reverse-engineering project. It is not intended for commercial use and may be subject to legal restrictions in your area. Please understand the risks before using or modifying this software.
+### Non-AIDL (Legacy) Module
+
+The non-AIDL module uses the **classic Android audio effect plugin interface** (often informally referred to as the “HIDL-based” path due to its association with the older audio HAL stack).
+
+- **Why it no longer works on Android 15+:** Google has migrated the audio effect framework from the legacy C-based plugin model to a stable AIDL HAL implementation. Devices launching with Android 15 no longer support loading `effect_handle_t` plugins, as the old framework path has been removed entirely. See [AIDL for HALs](https://source.android.com/docs/core/architecture/aidl/aidl-hals) for more details.
+
+### AIDL Module
+
+The AIDL module implements the **modern audio effect HAL** introduced in Android 13, which became the only officially supported audio effect path for devices launching with Android 15 and later.
+
+### Which module should you install?
+
+Run the following command:
+
+```bash
+adb shell ps -A | grep "audio.*aidl"
+```
+
+If your see any process related to audio HAL with "aidl" in the name, you need the AIDL module. If not, the non-AIDL module should work.
+
+## Disclaimers
+
+- **Tested hardware is narrow.** Non-AIDL is confirmed on Pixel 8 Pro / Android 14. AIDL is confirmed on Pixel 8 Pro / Android 16. Other devices may bootloop, may need vendor-specific shims (e.g. ShadoV's [PIXAML](https://github.com/ShadoV90/PIXAML) for AIDL on some Pixels), or may simply do nothing. Make a backup before flashing.
+- **Audio fidelity is best-effort.** The DSP is decompiled from `libv4a_fx.so`. Subtle deviations from the original ViPER4Android are expected. If you spot one, please open a PR — the source is here precisely so it can be improved.
+- **Not for commercial use.** This is a reverse-engineering project and may carry legal restrictions in your jurisdiction. Use at your own risk.
 
 ## Installation
 
-* Download the latest module from the [Releases page](https://github.com/likelikeslike/ViPERFX_RE/releases) and the ViPER4Android app from this [repo](https://github.com/likelikeslike/ViPER4Android)
-* Install the Magisk module (make sure you install the correct version for your device) and the ViPER4Android app.
-* Reboot your device and enjoy the new ViPER4Android.
+1. Download the **module zip matching your Android version** (see the table above) from the [Releases page](https://github.com/likelikeslike/ViPERFX_RE/releases), and the [ViPER4Android app](https://github.com/likelikeslike/ViPER4Android).
+2. Flash the Magisk module. **Do not flash both modules.**
+3. Install the app.
+4. Reboot. Open the app and verify effects are applied (use any of the diagnostic commands below to confirm).
 
 ## AIDL Driver Troubleshooting
 
 > [!NOTE]
-> The AIDL module needs to mount the driver files and `audio_effects*.xml` files, and it is only tested with `MagiskSu`. If you are using other root solutions, such as `KernelSU`, make sure you have enable the corresponding options to allow mounting files in `/vendor` and `/system`.
+> The AIDL module needs to mount the driver `.so` and `audio_effects*.xml` into `/vendor` and `/system`. This is verified with **MagiskSU**. If you use **KernelSU** or **APatch**, you may need to install any metamodule that allows mounting files into `/vendor` and `/system`.
 
 > [!IMPORTANT]
-> If you encounter issue with the installation or usage of the AIDL driver, you can diagnose the problem with the following commands. Make sure to capture the logs while reproducing the issue, and provide the logs if you want to ask for help in the issue tracker.
+> When opening an issue, capture the relevant logs *while reproducing the problem* and attach them. The commands below are listed in the order you should run them when troubleshooting.
 
 ### Log Tags
 
@@ -41,58 +62,54 @@ If you want to experience the ViPER on MacOS and Windows, please check out my pr
 | AIDL   | `AHAL_EffectContext` | E       |
 | AIDL   | `AHAL_EffectThread`  | V       |
 
-### Basic Diagnostic Commands
-
-#### 1. Check if the library is loaded
+### 1. Check if the library is loaded
 
 ```bash
 adb logcat -s 'ViPER4Android_AIDL:*' 'ViPER4Android:*' | grep -E 'Welcome|viperLibrary|created'
 ```
 
-**Expected**:
+Expected:
 
-```
+```bash
 ViPER4Android_AIDL: ViperAidlEffect created
 ViPER4Android: Welcome to ViPER FX
 ViPER4Android: Current version is 1.x.x (202xxxxx)
 ```
 
-**If missing:** The library is not being loaded by the audio framework.
-
-Verify the config XML is patched:
+If missing, the audio framework never loaded the `.so`. Verify the config XML was patched:
 
 ```bash
 adb shell cat /vendor/etc/audio_effects_config.xml | grep v4a
 ```
 
-**Expected:**
+Expected:
 
-```log
+```bash
 <library name="v4a_aidl" path="libv4a_aidl.so"/>
 <effect name="v4a_standard_aidl" library="v4a_aidl" uuid="90380da3-..." type="7261676f-..."/>
 ```
 
-Verify SELinux context:
+And verify the SELinux label on the library itself:
 
 ```bash
 adb shell su -c 'ls -Z /vendor/lib64/soundfx/libv4a_*.so'
 ```
 
-**Expected:**
+Expected:
 
-```log
+```bash
 u:object_r:vendor_file:s0 /vendor/lib64/soundfx/libv4a_aidl.so
 ```
 
-#### 2. Check if SHM files exist and have correct permissions
+### 2. Check if SHM files exist and have correct permissions
 
 ```bash
 adb shell ls -laZ /data/local/tmp/v4a/
 ```
 
-**Expected:**
+Expected:
 
-```log
+```bash
 -rw-rw-rw- 1 audioserver audio u:object_r:shell_data_file:s0   32784 ... shm_hp.bin
 -rw-rw-rw- 1 audioserver audio u:object_r:shell_data_file:s0   32784 ... shm_spk.bin
 -rw-rw-rw- 1 audioserver audio u:object_r:shell_data_file:s0     256 ... shm_status.bin
@@ -104,9 +121,9 @@ Inspect SHM header (magic number check):
 adb shell xxd -l 16 /data/local/tmp/v4a/shm_status.bin
 ```
 
-**Expected:**
+Expected:
 
-```log
+```bash
 00000000: 534d 3456 0300 0000 0100 0000 0100 0000  SM4V............
 ```
 
@@ -114,11 +131,11 @@ adb shell xxd -l 16 /data/local/tmp/v4a/shm_status.bin
 
 ```bash
 adb logcat -d -s audit | grep v4a
-# or
+# or, broader:
 adb logcat -d | grep -E 'avc.*denied.*(v4a|shm|shell_data_file)'
 ```
 
-SELinux denials on the SHM files will prevent the HAL from reading params. The `post-fs-data.sh` script injects live policy rules, but they may not persist across all scenarios.
+If you see `avc: denied` lines naming the HAL process and the SHM files, the live policy injection from `post-fs-data.sh` did not stick. This is the single most common cause of "module installs cleanly but audio is unprocessed."
 
 #### 4. Dump audioserver effect list
 
@@ -126,9 +143,9 @@ SELinux denials on the SHM files will prevent the HAL from reading params. The `
 adb shell dumpsys media.audio_flinger | grep -E -B2 -A10 'Effect ID|ViPER|v4a|90380da3'
 ```
 
-**Expected (effect loaded on session 0):**
+Expected (effect loaded on session xxx):
 
-```log
+```bash
   Effect ID xxx:
     Session State Registered Internal Enabled Suspended:
     00000   002   y          n        y       n
@@ -146,9 +163,9 @@ adb shell dumpsys media.audio_flinger | grep -E -B2 -A10 'Effect ID|ViPER|v4a|90
 adb shell ps -A | grep audio
 ```
 
-**Expected (Pixel 8 Pro):**
+Expected (Pixel 8 Pro):
 
-```log
+```bash
 audioserver   1044     1  ...  S android.hardware.audio.service-aidl.aoc
 audioserver   1107     1  ...  S audioserver
 ```
@@ -163,12 +180,14 @@ adb logcat --pid=$(adb shell pidof android.hardware.audio.service-aidl.aoc | tr 
 
 ## Building
 
-* Install the NDK, CMake and Make.
-* Run `make libs` to build .so files.
-* Run `make zip` to generate Magisk module.
+Prerequisites: Android NDK, CMake, Make. Set `ANDROID_NDK_HOME` (or `ANDROID_NDK_ROOT`).
+
+```bash
+make libs   # build libv4a_re.so for arm64-v8a and armeabi-v7a
+make zip    # build + package a flashable Magisk module zip
+```
 
 ## Credits
 
-Zhuhang and ViPER520 for making ViPER4Android
-
-Martmists, Iscle, llsl for reverse-engineering
+- Zhuhang and ViPER520 — original ViPER4Android.
+- Martmists, Iscle, llsl — reverse-engineering of the DSP.
