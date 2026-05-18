@@ -127,7 +127,7 @@ Expected:
 00000000: 534d 3456 0300 0000 0100 0000 0100 0000  SM4V............
 ```
 
-#### 3. Check SELinux denials
+### 3. Check SELinux denials
 
 ```bash
 adb logcat -d -s audit | grep v4a
@@ -137,7 +137,7 @@ adb logcat -d | grep -E 'avc.*denied.*(v4a|shm|shell_data_file)'
 
 If you see `avc: denied` lines naming the HAL process and the SHM files, the live policy injection from `post-fs-data.sh` did not stick. This is the single most common cause of "module installs cleanly but audio is unprocessed."
 
-#### 4. Dump audioserver effect list
+### 4. Dump audioserver effect list
 
 ```bash
 adb shell dumpsys media.audio_flinger | grep -E -B2 -A10 'Effect ID|ViPER|v4a|90380da3'
@@ -156,7 +156,7 @@ Expected (effect loaded on session xxx):
     - implementor: ViPER520 / RE Team
 ```
 
-#### 5. Filter by audio HAL process
+### 5. Filter by audio HAL process
 
 ```bash
 # Find the audio HAL process name (device-specific)
