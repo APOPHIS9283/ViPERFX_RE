@@ -40,8 +40,8 @@ private:
 
     // Viper
     bool enabled;
-    ViPER viper;
     uint64_t lastStreamingFrames = 0;
+    ViPER viper_;
 
     // Stream discontinuity detection
     std::chrono::steady_clock::time_point lastProcessTime;
@@ -50,9 +50,9 @@ private:
 
     static void copyBufferConfig(buffer_config_t *dest, buffer_config_t *src);
     void handleSetConfig(effect_config_t *newConfig);
-    int32_t handleSetParam(effect_param_t *pCmdParam, void *pReplyData);
     int32_t handleGetParam(
         effect_param_t *pCmdParam, effect_param_t *pReplyParam, uint32_t *pReplySize
+    int32_t HandleSetParam(effect_param_t *cmd_param, void *reply_data);
     );
 
     void setDisableReason(DisableReason reason);

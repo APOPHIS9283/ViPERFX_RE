@@ -169,51 +169,49 @@ void ViperContext::handleSetConfig(effect_config_t *newConfig) {
     viper.resetAllEffects();
 }
 
-int32_t ViperContext::handleSetParam(effect_param_t *pCmdParam, void *pReplyData) {
+int32_t ViperContext::HandleSetParam(effect_param_t *cmd_param, void *reply_data) {
     // The value offset of an effect parameter is computed by rounding up
     // the parameter size to the next 32 bit alignment.
-    uint32_t vOffset =
-        ((pCmdParam->psize + sizeof(int32_t) - 1) / sizeof(int32_t)) * sizeof(int32_t);
+    const uint32_t offset =
+        ((cmd_param->psize + sizeof(int32_t) - 1) / sizeof(int32_t)) * sizeof(int32_t);
 
-    *(int *) pReplyData = 0;
+    *static_cast<int *>(reply_data) = 0;
 
-    int param = *(int *) (pCmdParam->data);
-    int *intValues = (int *) (pCmdParam->data + vOffset);
-    switch (pCmdParam->vsize) {
+    const int param = *reinterpret_cast<int *>(cmd_param->data);
+    const int *int_values = reinterpret_cast<int *>(cmd_param->data + offset);
+    switch (cmd_param->vsize) {
         case sizeof(int): {
-            viper.DispatchCommand(param, intValues[0], 0, 0, 0, 0, nullptr);
+            viper_.DispatchRawParam(param, int_values[0], 0, 0, 0, nullptr);
             return 0;
         }
         case sizeof(int) * 2: {
-            viper.DispatchCommand(param, intValues[0], intValues[1], 0, 0, 0, nullptr);
+            viper_.DispatchRawParam(param, int_values[0], int_values[1], 0, 0, nullptr);
             return 0;
         }
         case sizeof(int) * 3: {
-            viper.DispatchCommand(
-                param, intValues[0], intValues[1], intValues[2], 0, 0, nullptr
-            );
-            return 0;
-        }
-        case sizeof(int) * 4: {
-            viper.DispatchCommand(
-                param, intValues[0], intValues[1], intValues[2], intValues[3], 0, nullptr
+            viper_.DispatchRawParam(
+                param, int_values[0], int_values[1], int_values[2], 0, nullptr
             );
             return 0;
         }
         case 256:
         case 1024: {
-            uint32_t arrSize = *(uint32_t *) (pCmdParam->data + vOffset);
-            signed char *arr =
-                (signed char *) (pCmdParam->data + vOffset + sizeof(uint32_t));
-            viper.DispatchCommand(param, 0, 0, 0, 0, arrSize, arr);
+            const uint32_t arr_size =
+                *reinterpret_cast<uint32_t *>(cmd_param->data + offset);
+            const auto arr = reinterpret_cast<signed char *>(
+                cmd_param->data + offset + sizeof(uint32_t)
+            );
+            viper_.DispatchRawParam(param, 0, 0, 0, arr_size, arr);
             return 0;
         }
         case 8192: {
-            int value1 = *(int *) (pCmdParam->data + vOffset);
-            uint32_t arrSize = *(uint32_t *) (pCmdParam->data + vOffset + sizeof(int));
-            signed char *arr = (signed char *) (pCmdParam->data + vOffset + sizeof(int)
-                                                + sizeof(uint32_t));
-            viper.DispatchCommand(param, value1, 0, 0, 0, arrSize, arr);
+            const int value1 = *reinterpret_cast<int *>(cmd_param->data + offset);
+            const uint32_t arr_size =
+                *reinterpret_cast<uint32_t *>(cmd_param->data + offset + sizeof(int));
+            const auto arr = reinterpret_cast<signed char *>(
+                cmd_param->data + offset + sizeof(int) + sizeof(uint32_t)
+            );
+            viper_.DispatchRawParam(param, value1, 0, 0, arr_size, arr);
             return 0;
         }
         default: {
