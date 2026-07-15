@@ -6,10 +6,10 @@
 // Source: https://android.googlesource.com/platform/system/media/+/master/audio/include/system
 
 typedef struct effect_uuid_s {
-    uint32_t timeLow;
-    uint16_t timeMid;
-    uint16_t timeHiAndVersion;
-    uint16_t clockSeq;
+    uint32_t time_low;
+    uint16_t time_mid;
+    uint16_t time_hi_and_version;
+    uint16_t clock_seq;
     uint8_t node[6];
 } effect_uuid_t;
 
@@ -28,10 +28,10 @@ static const char *const EFFECT_UUID_NULL_STR = "ec7178ec-e5e1-4432-a3f4-4657e67
 typedef struct effect_descriptor_s {
     effect_uuid_t type;   // UUID of to the OpenSL ES interface implemented by this effect
     effect_uuid_t uuid;   // UUID for this particular implementation
-    uint32_t apiVersion;  // Version of the effect control API implemented
+    uint32_t api_version; // Version of the effect control API implemented
     uint32_t flags;       // effect engine capabilities/requirements flags (see below)
-    uint16_t cpuLoad;     // CPU load indication (see below)
-    uint16_t memoryUsage; // Data Memory usage (see below)
+    uint16_t cpu_load;    // CPU load indication (see below)
+    uint16_t memory_usage;                   // Data Memory usage (see below)
     char name[EFFECT_STRING_LEN_MAX];        // human readable effect name
     char implementor[EFFECT_STRING_LEN_MAX]; // human readable effect implementor name
 } effect_descriptor_t;
@@ -270,7 +270,7 @@ struct effect_interface_s {
     //                                  invalid input/output buffer description
     ////////////////////////////////////////////////////////////////////////////////
     int32_t (*process)(
-        effect_handle_t self, audio_buffer_t *inBuffer, audio_buffer_t *outBuffer
+        effect_handle_t self, audio_buffer_t *in_buffer, audio_buffer_t *out_buffer
     );
     ////////////////////////////////////////////////////////////////////////////////
     //
@@ -304,11 +304,11 @@ struct effect_interface_s {
     ////////////////////////////////////////////////////////////////////////////////
     int32_t (*command)(
         effect_handle_t self,
-        uint32_t cmdCode,
-        uint32_t cmdSize,
-        void *pCmdData,
-        uint32_t *replySize,
-        void *pReplyData
+        uint32_t cmd_code,
+        uint32_t cmd_size,
+        void *cmd_data,
+        uint32_t *reply_size,
+        void *reply_data
     );
     ////////////////////////////////////////////////////////////////////////////////
     //
@@ -329,7 +329,7 @@ struct effect_interface_s {
     //        *pDescriptor:     updated with the effect descriptor.
     //
     ////////////////////////////////////////////////////////////////////////////////
-    int32_t (*get_descriptor)(effect_handle_t self, effect_descriptor_t *pDescriptor);
+    int32_t (*get_descriptor)(effect_handle_t self, effect_descriptor_t *descriptor);
     ////////////////////////////////////////////////////////////////////////////////
     //
     //    Function:       process_reverse
@@ -359,7 +359,7 @@ struct effect_interface_s {
     //                                  invalid input/output buffer description
     ////////////////////////////////////////////////////////////////////////////////
     int32_t (*process_reverse)(
-        effect_handle_t self, audio_buffer_t *inBuffer, audio_buffer_t *outBuffer
+        effect_handle_t self, audio_buffer_t *in_buffer, audio_buffer_t *out_buffer
     );
 };
 
@@ -725,7 +725,7 @@ enum effect_command_e {
 // channels at a given time. Frame size for unspecified format (AUDIO_FORMAT_OTHER) is 8 bit by
 // definition
 typedef struct audio_buffer_s {
-    size_t frameCount; // number of frames in buffer
+    size_t frame_count; // number of frames in buffer
     union {
         void *raw;    // raw pointer to start of buffer
         float *f32;   // pointer to float 32 bit data at start of buffer
@@ -737,9 +737,9 @@ typedef struct audio_buffer_s {
 
 typedef int32_t (*buffer_function_t)(void *cookie, audio_buffer_t *buffer);
 typedef struct buffer_provider_s {
-    buffer_function_t getBuffer;     // retrieve next buffer
-    buffer_function_t releaseBuffer; // release used buffer
-    void *cookie;                    // for use by client of buffer provider functions
+    buffer_function_t get_buffer;     // retrieve next buffer
+    buffer_function_t release_buffer; // release used buffer
+    void *cookie;                     // for use by client of buffer provider functions
 } buffer_provider_t;
 
 // The buffer_config_s structure specifies the input or output audio format
@@ -749,12 +749,12 @@ typedef struct buffer_provider_s {
 typedef struct buffer_config_s {
     audio_buffer_t
         buffer; // buffer for use by process() function if not passed explicitly
-    uint32_t samplingRate; // sampling rate
-    uint32_t channels;     // channel mask (see audio_channel_mask_t in audio.h)
-    buffer_provider_t bufferProvider; // buffer provider
-    uint8_t format;                   // Audio format (see audio_format_t in audio.h)
-    uint8_t accessMode; // read/write or accumulate in buffer (effect_buffer_access_e)
-    uint16_t mask;      // indicates which of the above fields is valid
+    uint32_t sampling_rate; // sampling rate
+    uint32_t channels;      // channel mask (see audio_channel_mask_t in audio.h)
+    buffer_provider_t buffer_provider; // buffer provider
+    uint8_t format;                    // Audio format (see audio_format_t in audio.h)
+    uint8_t access_mode; // read/write or accumulate in buffer (effect_buffer_access_e)
+    uint16_t mask;       // indicates which of the above fields is valid
 } buffer_config_t;
 // Values for "accessMode" field of buffer_config_t:
 //   overwrite, read only, accumulate (read/modify/write)
@@ -766,8 +766,8 @@ typedef enum {
 // effect_config_s structure describes the format of the pCmdData argument of EFFECT_CMD_SET_CONFIG
 // command to configure audio parameters and buffers for effect engine input and output.
 typedef struct effect_config_s {
-    buffer_config_t inputCfg;
-    buffer_config_t outputCfg;
+    buffer_config_t input_cfg;
+    buffer_config_t output_cfg;
 } effect_config_t;
 // effect_param_s structure describes the format of the pCmdData argument of EFFECT_CMD_SET_PARAM
 // command and pCmdData and pReplyData of EFFECT_CMD_GET_PARAM command.
@@ -855,9 +855,9 @@ typedef struct audio_effect_library_s {
     ////////////////////////////////////////////////////////////////////////////////
     int32_t (*create_effect)(
         const effect_uuid_t *uuid,
-        int32_t sessionId,
-        int32_t ioId,
-        effect_handle_t *pHandle
+        int32_t session_id,
+        int32_t io_id,
+        effect_handle_t *handle
     );
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -897,9 +897,7 @@ typedef struct audio_effect_library_s {
     //        *pDescriptor:     updated with the effect descriptor.
     //
     ////////////////////////////////////////////////////////////////////////////////
-    int32_t (*get_descriptor)(
-        const effect_uuid_t *uuid, effect_descriptor_t *pDescriptor
-    );
+    int32_t (*get_descriptor)(const effect_uuid_t *uuid, effect_descriptor_t *descriptor);
 } audio_effect_library_t;
 
 // Name of the hal_module_info

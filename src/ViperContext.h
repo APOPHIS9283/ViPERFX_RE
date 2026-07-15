@@ -3,7 +3,6 @@
 #include "essential.h"
 #include "viper/ViPER.h"
 #include <chrono>
-#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -20,41 +19,42 @@ public:
 
     ViperContext();
 
-    int32_t handleCommand(
-        uint32_t cmdCode,
-        uint32_t cmdSize,
-        void *pCmdData,
-        uint32_t *replySize,
-        void *pReplyData
+    int32_t HandleCommand(
+        uint32_t cmd_code,
+        uint32_t cmd_size,
+        void *cmd_data,
+        uint32_t *reply_size,
+        void *reply_data
     );
-    int32_t process(audio_buffer_t *inBuffer, audio_buffer_t *outBuffer);
+    int32_t Process(audio_buffer_t *in_buffer, audio_buffer_t *out_buffer);
 
 private:
-    effect_config_t config;
-    DisableReason disableReason;
-    std::string disableReasonMessage;
+    effect_config_t config_;
+    DisableReason disable_reason_;
+    std::string disable_reason_message_;
 
     // Processing buffer
-    std::vector<float> buffer;
-    size_t bufferFrameCount;
+    std::vector<float> buffer_;
+    size_t buffer_frame_count_;
 
     // Viper
-    bool enabled;
-    uint64_t lastStreamingFrames = 0;
+    bool enable_;
     ViPER viper_;
+    uint64_t last_streaming_frames_ = 0;
 
     // Stream discontinuity detection
-    std::chrono::steady_clock::time_point lastProcessTime;
-    bool hasProcessed;
-    uint32_t fadeInRemaining;
+    std::chrono::steady_clock::time_point last_process_time_;
+    bool has_processed_;
+    uint32_t fade_in_remaining_;
 
-    static void copyBufferConfig(buffer_config_t *dest, buffer_config_t *src);
-    void handleSetConfig(effect_config_t *newConfig);
-    int32_t handleGetParam(
-        effect_param_t *pCmdParam, effect_param_t *pReplyParam, uint32_t *pReplySize
+    static void CopyBufferConfig(buffer_config_t *dest, buffer_config_t *src);
+    void HandleSetConfig(effect_config_t *new_config);
+
     int32_t HandleSetParam(effect_param_t *cmd_param, void *reply_data);
+    int32_t HandleGetParam(
+        effect_param_t *cmd_param, effect_param_t *reply_param, uint32_t *reply_size
     );
 
-    void setDisableReason(DisableReason reason);
-    void setDisableReason(DisableReason reason, std::string message);
+    void SetDisableReason(DisableReason reason);
+    void SetDisableReason(DisableReason reason, std::string message);
 };
