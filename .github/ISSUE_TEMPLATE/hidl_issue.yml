@@ -43,11 +43,20 @@ body:
       required: true
 
   - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostic outputs
+      description: |
+        Run the diagnostic commands from the [Non-AIDL (Legacy)](https://github.com/likelikeslike/ViPERFX_RE#non-aidl-legacy) troubleshooting section in the README and paste the outputs here (driver-load check, effect list, SELinux denials).
+    validations:
+      required: true
+
+  - type: textarea
     id: app-log
     attributes:
       label: ViPER4Android app log
       description: |
-        Upload the app log from the ViPER4Android app (`Android/data/com.llsl.viper4android/files/viper.log`)
+        Upload the app log from the ViPER4Android app (`/data/data/com.llsl.viper4android/files/Log/viper.log`).
     validations:
       required: true
 

@@ -11,7 +11,7 @@ body:
         Please confirm the following before submitting. Issues that skip these steps will be closed.
       options:
         - label: |
-            I have read the [AIDL Driver Troubleshooting](https://github.com/likelikeslike/ViPERFX_RE#aidl-driver-troubleshooting) section in the README.
+            I have read the [AIDL](https://github.com/likelikeslike/ViPERFX_RE#aidl) troubleshooting section in the README.
           required: true
         - label: |
             I have searched [existing issues](https://github.com/likelikeslike/ViPERFX_RE/issues?q=is%3Aissue) (both open and closed) and found no duplicate.
@@ -56,7 +56,7 @@ body:
     attributes:
       label: Diagnostic outputs
       description: |
-        Run the diagnostic commands from the [AIDL Driver Troubleshooting](https://github.com/likelikeslike/ViPERFX_RE#aidl-driver-troubleshooting) section and paste the outputs here.
+        Run the diagnostic commands from the [AIDL](https://github.com/likelikeslike/ViPERFX_RE#aidl) troubleshooting section and paste the outputs here.
     validations:
       required: true
 
@@ -65,7 +65,7 @@ body:
     attributes:
       label: ViPER4Android app log
       description: |
-        Upload the app log from the ViPER4Android app (`Android/data/com.llsl.viper4android/files/viper.log`)
+        Upload the app log from the ViPER4Android app (`/data/data/com.llsl.viper4android/files/Log/viper.log`).
     validations:
       required: true
 
