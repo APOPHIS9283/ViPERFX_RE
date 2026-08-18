@@ -192,7 +192,8 @@ module: libs
 	done
 
 # Prepare AIDL Magisk module directory
-module-aidl: aidl-libs
+# Pass SKIP_LIBS=1 to skip recompilation when .so files are already in out/
+module-aidl: $(if $(SKIP_LIBS),,aidl-libs)
 	@echo "Preparing Magisk module (AIDL)..."
 	@rm -rf $(MODULE_AIDL_OUT)
 	@mkdir -p $(MODULE_AIDL_OUT)/common/files
