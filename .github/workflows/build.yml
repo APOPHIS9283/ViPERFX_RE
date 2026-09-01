@@ -50,96 +50,6 @@ permissions:
   pull-requests: read
 
 jobs:
-  # ── Non-AIDL: compile both ABIs in parallel ──────────────────────────────
-  build:
-    name: Build (${{ matrix.abi }})
-    runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        abi: [arm64-v8a, armeabi-v7a]
-
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v7
-        with:
-          submodules: recursive
-
-      - name: Set up Android NDK
-        id: setup-ndk
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r29
-          add-to-path: false
-
-      - name: Set version variables
-        id: ver
-        run: |
-          echo "name=$(grep '^version=' module/module.prop | cut -d= -f2)" >> "$GITHUB_OUTPUT"
-          echo "code=$(grep '^versionCode=' module/module.prop | cut -d= -f2)" >> "$GITHUB_OUTPUT"
-
-      - name: Build ${{ matrix.abi }}
-        env:
-          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-        run: |
-          make ${{ matrix.abi }} \
-            VERSION_NAME="${{ steps.ver.outputs.name }}" \
-            VERSION_CODE="${{ steps.ver.outputs.code }}"
-
-      - name: Upload .so artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: libv4a_re-${{ matrix.abi }}-${{ steps.ver.outputs.name }}
-          path: out/libv4a_re_${{ matrix.abi }}.so
-          retention-days: 7
-
-  # ── Non-AIDL: package module (no recompile) ───────────────────────────────
-  package:
-    name: Package non-AIDL module
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v7
-        with:
-          submodules: recursive
-
-      - name: Set up Android NDK
-        id: setup-ndk
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r29
-          add-to-path: false
-
-      - name: Set version variables
-        id: ver
-        run: |
-          echo "name=$(grep '^version=' module/module.prop | cut -d= -f2)" >> "$GITHUB_OUTPUT"
-          echo "code=$(grep '^versionCode=' module/module.prop | cut -d= -f2)" >> "$GITHUB_OUTPUT"
-
-      - name: Download pre-built .so artifacts
-        uses: actions/download-artifact@v8
-        with:
-          pattern: libv4a_re-*-${{ steps.ver.outputs.name }}
-          path: out/
-          merge-multiple: true
-
-      - name: Prepare module directory
-        run: |
-          make module \
-            VERSION_NAME="${{ steps.ver.outputs.name }}" \
-            VERSION_CODE="${{ steps.ver.outputs.code }}" \
-            SKIP_LIBS=1
-
-      - name: Upload module artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: ViPER4Android-RE-${{ steps.ver.outputs.name }}
-          path: out/magisk_module/
-          retention-days: 30
-
   # ── AIDL: generate stubs once, then compile both ABIs in parallel ─────────
   aidl-gen:
     name: Generate AIDL stubs
@@ -353,7 +263,7 @@ jobs:
   release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
-    needs: [package, package-aidl]
+    needs: [package-aidl]
     if: github.event_name != 'pull_request'
 
     permissions:
@@ -378,13 +288,6 @@ jobs:
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Download non-AIDL module directory
-        if: steps.check.outputs.skip == 'false'
-        uses: actions/download-artifact@v8
-        with:
-          name: ViPER4Android-RE-${{ steps.check.outputs.version }}
-          path: dist/module/
-
       - name: Download AIDL module directory
         if: steps.check.outputs.skip == 'false'
         uses: actions/download-artifact@v8
@@ -392,37 +295,27 @@ jobs:
           name: ViPER4Android-RE-AIDL-${{ steps.check.outputs.version }}
           path: dist/module-aidl/
 
-      - name: Repackage as flashable zips
+      - name: Repackage as flashable zip
         if: steps.check.outputs.skip == 'false'
         run: |
-          cd dist/module && zip -r9 ../ViPER4Android-RE-${{ steps.check.outputs.version }}.zip . && cd ../..
           cd dist/module-aidl && zip -r9 ../ViPER4Android-RE-AIDL-${{ steps.check.outputs.version }}.zip . && cd ../..
 
-      - name: Generate update.json files
+      - name: Generate update.json file
         if: steps.check.outputs.skip == 'false'
         run: |
           VERSION="${{ steps.check.outputs.version }}"
           VERSION_CODE=$(grep '^versionCode=' module/module.prop | cut -d= -f2)
           REPO="${{ github.repository }}"
-          CHANGELOG="https://github.com/${REPO}/releases/tag/${VERSION}"
+          CHANGELOG="https://github.com/${REPO}/releases/download/${VERSION}/changelog.md"
           cat > dist/update.json <<EOF
           {
             "version": "${VERSION}",
-            "versionCode": ${VERSION_CODE},
-            "zipUrl": "https://github.com/${REPO}/releases/download/${VERSION}/ViPER4Android-RE-${VERSION}.zip",
-            "changelog": "${CHANGELOG}"
-          }
-          EOF
-          cat > dist/update-aidl.json <<EOF
-          {
-            "version": "${VERSION}-aidl",
             "versionCode": ${VERSION_CODE},
             "zipUrl": "https://github.com/${REPO}/releases/download/${VERSION}/ViPER4Android-RE-AIDL-${VERSION}.zip",
             "changelog": "${CHANGELOG}"
           }
           EOF
           echo "--- update.json ---" && cat dist/update.json
-          echo "--- update-aidl.json ---" && cat dist/update-aidl.json
 
       - name: Collect changes from ViPERFX_RE and ViPERDSP submodule
         if: steps.check.outputs.skip == 'false'
@@ -509,61 +402,25 @@ jobs:
             echo "${DELIM}"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Generate LLM changelog
-        if: steps.check.outputs.skip == 'false'
-        id: llm
-        uses: nosovj/llm-release-action@v1
-        with:
-          model: gemini/gemini-3.5-flash-lite
-          current_version: ${{ steps.check.outputs.version }}
-          content_override: ${{ steps.changes.outputs.content }}
-          temperature: 0.3
-          max_tokens: 4000
-          timeout: 180
-          changelog_config: |
-            default:
-              preset: developer
-              emojis: true
-              include_commits: false
-              include_contributors: true
-              link_prs: true
-              link_issues: true
-              generate_summary: true
-              sections: [breaking, security, features, improvements, fixes, performance, infrastructure, docs]
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_KEY }}
-
-      - name: Write changelog.md and patch update.json
+      - name: Write changelog.md and release body
         if: steps.check.outputs.skip == 'false'
         run: |
           VERSION="${{ steps.check.outputs.version }}"
           REPO="${{ github.repository }}"
           CHANGELOG_URL="https://github.com/${REPO}/releases/download/${VERSION}/changelog.md"
 
-          # Extract changelog-only markdown (for Magisk update checker)
-          echo '${{ steps.llm.outputs.changelogs }}' \
-            | jq -r '.default.en // "(no changelog generated)"' \
-            > dist/changelog.md
+          # Write collected changes directly to changelog.md
+          cat << 'EOF' > dist/changelog.md
+          ${{ steps.changes.outputs.content }}
+          EOF
 
-          # Build full release body (static header + LLM changelog) into a separate file
+          # Build full release body
           cat > dist/release_body.md <<'BODY_EOF'
-          ## ViPER4Android Reverse Engineered VERSION_PLACEHOLDER
-
-          ### Installation
-          Flash the zip matching your device's audio HAL:
-          - **`ViPER4Android-RE-*.zip`** — non-AIDL (Android ≤ 14 / legacy HAL)
-          - **`ViPER4Android-RE-AIDL-*.zip`** — AIDL (Android 13+ / API 33+)
-
-          Not sure which? Run: `adb shell ps -A | grep "audio.*aidl"`
-          If you see output, use the AIDL zip. Otherwise use the non-AIDL zip.
+          ## ViPER4Android Reverse Engineered VERSION_PLACEHOLDER (AIDL)
 
           BODY_EOF
           sed -i "s/VERSION_PLACEHOLDER/${VERSION}/" dist/release_body.md
           cat dist/changelog.md >> dist/release_body.md
-
-          # Patch the changelog field in both update.json files to point at the raw asset
-          jq --arg url "$CHANGELOG_URL" '.changelog = $url' dist/update.json      > dist/update.json.tmp      && mv dist/update.json.tmp      dist/update.json
-          jq --arg url "$CHANGELOG_URL" '.changelog = $url' dist/update-aidl.json > dist/update-aidl.json.tmp && mv dist/update-aidl.json.tmp dist/update-aidl.json
 
       - name: Publish release
         if: steps.check.outputs.skip == 'false'
@@ -576,6 +433,5 @@ jobs:
           files: |
             dist/*.zip
             dist/update.json
-            dist/update-aidl.json
             dist/changelog.md
           body_path: dist/release_body.md

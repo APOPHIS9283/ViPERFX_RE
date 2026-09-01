@@ -181,7 +181,6 @@ module: libs
 	@cp $(MODULE_DIR)/customize.sh $(MODULE_OUT)/
 	@cp $(MODULE_DIR)/post-fs-data.sh $(MODULE_OUT)/
 	@cp $(MODULE_DIR)/uninstall.sh $(MODULE_OUT)/
-	@cp $(MODULE_DIR)/LICENSE $(MODULE_OUT)/
 	@cp -r $(MODULE_DIR)/common/* $(MODULE_OUT)/common/
 	@sed -i.bak \
 		-e 's/^version=.*/version=$(VERSION_NAME)/' \
@@ -202,7 +201,6 @@ module-aidl: $(if $(SKIP_LIBS),,aidl-libs)
 	@cp $(MODULE_DIR)/customize.sh $(MODULE_AIDL_OUT)/
 	@cp $(MODULE_DIR)/post-fs-data-aidl.sh $(MODULE_AIDL_OUT)/post-fs-data.sh
 	@cp $(MODULE_DIR)/uninstall.sh $(MODULE_AIDL_OUT)/
-	@cp $(MODULE_DIR)/LICENSE $(MODULE_AIDL_OUT)/
 	@cp -r $(MODULE_DIR)/common/* $(MODULE_AIDL_OUT)/common/
 	@cp $(MODULE_DIR)/common/install-aidl.sh $(MODULE_AIDL_OUT)/common/install.sh
 	@sed -i.bak \
